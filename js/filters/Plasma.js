@@ -35,10 +35,10 @@ Phaser.Filter.Plasma = function (game) {
             "color2 = (cos(length(gl_FragCoord.xy - center) * size) + 1.0) / 2.0;",
             "color = (color1 + color2) / 2.0;",
           
-            "float red = (cos(PI * color / redShift + ptime * 3.0) + 1.0) / 2.0;",
-            "float green = (sin(PI * color / greenShift + ptime * 3.0) + 1.0) / 2.0;",
-            "float blue = (sin(PI * color / blueShift + ptime * 3.0) + 1.0) / 2.0;",
-
+            "float red = tan((cos(PI * color / redShift + ptime * 3.0) + 1.0) / 2.0);",
+            "float green = tan((sin(PI * color / greenShift + ptime * 3.0) + 1.0) / 2.0);",
+            "float blue = tan((sin(PI * color / blueShift + ptime * 3.0) + 1.0) / 2.0);",
+            
             "gl_FragColor = vec4(red, green, blue, alpha);",
         "}"
     ];
