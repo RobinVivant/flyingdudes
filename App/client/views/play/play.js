@@ -1,56 +1,154 @@
 
 Session.set('phaserLoaded', false);
 
-phaserGame = {
-    pgame : {},
-    background : {},
-    filterPlasma : {},
-    flicker : 0.0001,
-    level : 1.05,
-    flagFS : false,
-    counter : 0
-};
+var myTween;
+var player;
+var cursors;
+var arrow;
+var catchFlag = false;
+var launchVelocity = 0;
+var launched;
 
-phaserGame.getRandom = function(min, max) {
-    return Math.random() * (max - min) + min;
+function preload() {
+    game.load.image('background','assets/sprites/starfield.jpg');
+    game.load.image('player','assets/sprites/the_dude.png');
+    game.load.image('analog', 'assets/sprites/fusia.png');
+    game.load.image('arrow', 'assets/sprites/longarrow2.png');
 }
 
-phaserGame.preload = function() {
-    phaserGame.pgame.load.script('filterPlasma', 'filters/Plasma.js');
-}
+function create() {
 
-phaserGame.update = function() {
+    game.world.setBounds(0, 0, 5000, 600);
+    game.add.tileSprite(0, 0, 5000, 600, 'background');
 
-    phaserGame.filterPlasma.update();
+    var graphics = game.add.graphics(0,0);
+    graphics.beginFill(0x049e0c);
+    graphics.drawRect(395, 400, 10, 250);
 
-    if(phaserGame.flagFS == false){
-        phaserGame.filterPlasma.blueShift = phaserGame.getRandom(phaserGame.level-phaserGame.flicker,phaserGame.level+phaserGame.flicker) * Math.abs(Math.tan(phaserGame.filterPlasma.blueShift));
-        phaserGame.filterPlasma.redShift = phaserGame.getRandom(phaserGame.level-phaserGame.flicker,phaserGame.level+phaserGame.flicker) * Math.abs(Math.tan(phaserGame.filterPlasma.redShift));
-        phaserGame.filterPlasma.greenShift = phaserGame.getRandom(phaserGame.level-phaserGame.flicker,phaserGame.level+phaserGame.flicker) * Math.abs(Math.tan(phaserGame.filterPlasma.greenShift));
-    }else{
+    analog = game.add.sprite(400, 400, 'analog');
+    analog.width = 8;
+    analog.rotation = 220;
+    analog.alpha = 0;
+    analog.anchor.setTo(0.5, 0.0);
 
-    }
-    //filterPlasma.greenShift = Math.tan(filterPlasma.greenShift-getRandom(0.0,flicker));
-    phaserGame.filterPlasma.size = Math.sin(phaserGame.counter+=0.005) * (0.03 - 0.02) + 0.02;
-}
+    arrow = game.add.sprite(400, 400, 'arrow');
+    arrow.anchor.setTo(0.1, 0.5);
+    arrow.alpha = 0;
 
-phaserGame.create = function() {
+    player = game.add.sprite(300, 300, 'player');
+    player.width *= 0.2;
+    player.height *= 0.2;
+    player.anchor.setTo(0.5, 0.5);
+    player.body.collideWorldBounds = true;
+    player.body.bounce.setTo(0.9, 0.9);
+    player.body.linearDamping = 0.2;
+    player.body.gravity.setTo(0, 8);
 
-    phaserGame.background = phaserGame.pgame.add.sprite(0, 0);
-    phaserGame.background.width = 800;
-    phaserGame.background.height = 600;
+    // Enable input.
+    player.inputEnabled = true;
+    player.input.start(0, true);
+    player.events.onInputDown.add(set);
+    player.events.onInputUp.add(launch);
 
-    phaserGame.filterPlasma = phaserGame.pgame.add.filter('Plasma', 800, 600);
-    phaserGame.filterPlasma.size = 0.03;
-
-    phaserGame.background.filters = [phaserGame.filterPlasma];
-
-    phaserGame.pgame.input.onDown.add(function(){
-        phaserGame.flagFS = !phaserGame.flagFS;
-    }, phaserGame);
+    // this tween is to make the camera return to left side of world when done launching
+    // so it is not used until then
+    myTween = game.add.tween(player).to({x: 150}, 5000, Phaser.Easing.Linear.None);
+    myTween.onComplete.add(reappear, this);
+    game.camera.follow(player, Phaser.Camera.FOLLOW_TOPDOWN);
 
     Session.set('scriptsLoaded', true);
 }
+
+function reappear() {
+    launched = false;
+    player.alpha = 1;
+    player.angle = 0;
+}
+
+function set(player,pointer) {
+    //disallow launching until reset
+    if (!launched)
+    {
+        catchFlag = true;
+        game.camera.follow(null);
+        player.body.gravity.setTo(0,0);
+        player.body.velocity.setTo(0,0);
+    }
+}
+
+function launch() {
+
+    if (catchFlag)
+    {
+        catchFlag = false;
+        launched = true;
+        game.camera.follow(player, Phaser.Camera.FOLLOW_TOPDOWN);
+
+        arrow.alpha = 0;
+        analog.alpha = 0;
+        Xvector = (arrow.x - player.x)*3.8;
+        Yvector = (arrow.y - player.y)*3.8;
+        player.body.gravity.setTo(0,8);
+        player.body.velocity.setTo(Xvector,Yvector);
+    }
+}
+
+function update() {
+    arrow.rotation = game.physics.angleBetween(arrow, player);
+
+    //  Track the player sprite to the mouse
+    if (catchFlag)
+    {
+        distance = game.physics.distanceToPointer(arrow);
+        theta = game.physics.angleToPointer(arrow);
+
+        // Govern the distance the sprite is dragged away from launch post
+        if (distance > 300)
+        {
+            distance = 300;
+            adjacentX = Math.cos(theta) * distance;
+            oppositeY = Math.sin(theta) * distance;
+            player.x = 400 + adjacentX;
+            player.y = 400 + oppositeY;
+            analog.height = distance;
+        }
+        else
+        {
+            player.x = game.input.activePointer.worldX;
+            player.y = game.input.activePointer.worldY;
+            analog.height = distance;
+        }
+
+        arrow.alpha = 1;
+        analog.alpha = 0.5;
+        analog.rotation = arrow.rotation - Math.PI/2;
+        launchVelocity = analog.height;
+    }
+
+    //check sprite motion and if done, return camera to left side of world
+
+    var tweening = myTween.isRunning;
+
+    if (!tweening && launched && (player.x >= game.world.width-100 || player.body.deltaX() == 0))
+    {
+        player.body.velocity.setTo(0, 0);
+        player.alpha = 0;
+        myTween.start();
+
+    }else if (launched){
+        player.angle += launchVelocity/20;
+    }
+}
+
+function render() {
+    /*
+    game.debug.renderText("Drag the sprite and release to launch", 32, 32, 'rgb(0,255,0)');
+    game.debug.renderCameraInfo(game.camera, 32, 64);
+    game.debug.renderSpriteCoords(player, 32, 150);
+    game.debug.renderText("Launch Velocity: " + parseInt(launchVelocity), 550, 32, 'rgb(0,255,0)');
+    */
+}
+
 
 
 Template.play.helpers({
@@ -58,22 +156,17 @@ Template.play.helpers({
 });
 
 Template.play.created = function(){
-
     $("#theDudeImg").hide(500);
 
-    phaserGame.pgame = new Phaser.Game(0, 0, Phaser.AUTO, 'game-canvas', {
-            preload: phaserGame.preload,
-            create: phaserGame.create,
-            update: phaserGame.update
-        },
-        true, // background transparent
-        true // antialias
-    );
+    game = new Phaser.Game(800, 600, Phaser.CANVAS, 'game-canvas', {
+        preload: preload,
+        create: create,
+        update: update,
+        render: render }, true, true);
 };
 
 Template.play.destroyed = function(){
     $("#theDudeImg").show(500);
-    phaserGame.pgame.destroy()
 };
 
 
