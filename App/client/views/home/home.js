@@ -5,3 +5,6 @@ $.extend(Template.home, {
     learnMore : "Viens, on est bien bien bien..."
 });
 
+Template.home.created = function(){
+    Session.set('activePage', 'home');
+};

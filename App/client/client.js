@@ -1,0 +1,3 @@
+
+Session.set('activePage', 'home');
+
