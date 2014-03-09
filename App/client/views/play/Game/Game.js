@@ -116,6 +116,7 @@ fyd = {
             group : "rope",
             radius : r_tmp,
             mass : 10,
+            cof: 0.9,
             x : fyd.world.width/2,
             y : fyd.world.height/2,
             restitution : 0,
@@ -130,6 +131,7 @@ fyd = {
             radius : r_tmp,
             restitution : 0,
             mass : 10,
+            cof : 0.9,
             x : fyd.world.width/2,
             y : fyd.world.height/2,
             alpha : 1
@@ -163,23 +165,21 @@ fyd = {
         fyd.dude.handsToBodyConstraint = fyd.physics.rcm.distanceConstraint(fyd.dude.hands.getShape(), fyd.dude.bodyTop.getShape(), 0.5, 60);
         fyd.dude.innerBodyConstraint = fyd.physics.rcm.distanceConstraint(fyd.dude.bodyTop.getShape(), fyd.dude.bodyBot.getShape(), 0.5, 50);
         fyd.dude.bodyToFeetConstraint = fyd.physics.rcm.distanceConstraint(fyd.dude.bodyBot.getShape(), fyd.dude.feet.getShape(), 0.5, 80);
-        /*
-        fyd.dude.harmsAngleConstraint = fyd.physics.rcm.angleConstraint(
 
+        fyd.dude.harmsAngleConstraint = fyd.physics.rcm.angleConstraint(
             fyd.dude.hands.getShape(),
             fyd.dude.bodyTop.getShape(),
             fyd.dude.bodyBot.getShape(),
-            1,
-            90);
+            0.001,
+            Math.PI);
 
         fyd.dude.legsAngleConstraint = fyd.physics.rcm.angleConstraint(
-            fyd.dude.bodyBot.getShape(),
             fyd.dude.bodyTop.getShape(),
-
+            fyd.dude.bodyBot.getShape(),
             fyd.dude.feet.getShape(),
-            0.5,
-            130);
- */
+            0.001,
+            Math.PI);
+
         fyd.physics.world.subscribe('collisions:detected', function( data ){
             var c;
             for (var i = 0, l = data.collisions.length; i < l; i++){
@@ -203,62 +203,12 @@ fyd = {
             }
         });
 
-
-
         fyd.dude.bodyTop.follow();
-        /*
-        fyd.physics.center = Physics.body('circle', {
-            // anchor
-            x: fyd.world.width/2,
-            y: fyd.world.width/2,
-            mass : 40,
-            restitution : 0,
-            fixed : true,
-            radius:0
-        });
-        fyd.physics.world.add(fyd.physics.center);
-
-        fyd.physics.rope = Physics.body('circle', {
-            // anchor
-            radius : 4,
-            mass : 10,
-            restitution : 0
-        });
-        fyd.physics.world.add(fyd.physics.rope);
-
-        fyd.phaser.world.setBounds(0, 0, fyd.world.width, fyd.world.height);
-        fyd.phaser.add.tileSprite(0, 0, fyd.world.width, fyd.world.height, 'background');
-
-        fyd.centerMobile = fyd.phaser.add.graphics(0,0);
-        fyd.centerMobile.beginFill(0x049e0c);
-        fyd.centerMobile.drawRect(fyd.world.width/2-25, fyd.world.height/2-25, 50, 50);
-
-        fyd.analog = fyd.phaser.add.sprite(fyd.world.width/2, fyd.world.height/2, 'analog');
-        fyd.analog.width = 8;
-        fyd.analog.alpha = 1;
-        fyd.analog.anchor.setTo(0.5, 0.0);
-        fyd.analog.height = fyd.ropeLength;
-
-        fyd.player = new Player({
-            spriteId : 'player',
-            width : fyd.world.width/2,
-            height : fyd.world.height/2
-        });
-        fyd.player.setWidth( fyd.player.getWidth()*0.2);
-        fyd.player.setHeight( fyd.player.getHeight()*0.2);
-        fyd.player.enablePhysics(true);
-        fyd.player.getSprite().anchor.setTo(0.5, 0);
-
-        fyd.physics.rcm.constrain( fyd.physics.rope, fyd.physics.center, fyd.ropeLength );
-        fyd.physics.ropeConstraint = fyd.physics.rcm.constrain( fyd.player.getBody(), fyd.physics.rope, 4.5 );
-
-        fyd.phaser.input.mouse.mouseUpCallback = fyd.inputUp;
-        fyd.player.follow();
-*/
 
         fyd.phaser.input.mouse.mouseUpCallback = fyd.inputUp;
 
         fyd.phaser.input.keyboard.onUpCallback = function(event){
+
             if( event.keyCode == 13  && fyd.launched ){
                 fyd.dude.handsToRopeConstraint = fyd.physics.rcm.distanceConstraint(
                     fyd.dude.hands.getShape(),
@@ -273,12 +223,13 @@ fyd = {
         Physics.util.ticker.subscribe(function( time, dt ){
             if( fyd.phaser.input.keyboard.isDown(32) ){ // spacebar
                 var x = 1;
-                var coef = 0.01;
+                var coef = 0.02;
                 if( fyd.rope.edge.getShape().state.vel.get(0) < 0 )
                     x = -1;
                 if( fyd.rope.edge.getShape().state.vel.get(1) < 0 )
                     x = -1;
                 fyd.rope.edge.getShape().applyForce( Physics.vector(coef*x, coef) );
+                fyd.dude.feet.getShape().applyForce( Physics.vector(coef*x, coef) );
             }
             fyd.physics.world.step( time );
         });
