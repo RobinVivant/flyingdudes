@@ -1,8 +1,8 @@
 
 var config = {
     world : {
-        width : 3000,
-        height : 3000
+        width : 2000,
+        height : 2000
     },
     ropeLength : 200
 };
