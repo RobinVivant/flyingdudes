@@ -27,5 +27,3 @@ Template.play.destroyed = function(){
 
 
 
-
-
