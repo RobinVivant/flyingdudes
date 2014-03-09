@@ -1,3 +1,2 @@
 
 Session.set('activePage', 'home');
-
