@@ -1,10 +1,10 @@
 
 var config = {
     world : {
-        width : 2000,
-        height : 2000
+        width : 800,
+        height : 600
     },
     ropeLength : 250
 };
 
-$.extend(fyd,config);
+$.extend(fyd.cfg,config);

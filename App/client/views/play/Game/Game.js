@@ -1,4 +1,4 @@
-
+/*
 Session.set('phaserLoaded', false);
 
 var r_tmp = 10;
@@ -44,57 +44,6 @@ fyd = {
             iterations: 2
         });
         fyd.physics.world.add( fyd.physics.rcm );
-
-
-
-        /*
-        //          // anchor
-            x: fyd.world.width/2,
-            y: fyd.world.width/2,
-            mass : 40,
-            restitution : 0,
-            fixed : true,
-            radius:0
-        });
-        fyd.physics.world.add(fyd.physics.center);
-
-        fyd.physics.rope = Physics.body('circle', {
-            // anchor
-            radius : 4,
-            mass : 10,
-            restitution : 0
-        });
-        fyd.physics.world.add(fyd.physics.rope);
-
-        fyd.phaser.world.setBounds(0, 0, fyd.world.width, fyd.world.height);
-        fyd.phaser.add.tileSprite(0, 0, fyd.world.width, fyd.world.height, 'background');
-
-        fyd.centerMobile = fyd.phaser.add.graphics(0,0);
-        fyd.centerMobile.beginFill(0x049e0c);
-        fyd.centerMobile.drawRect(fyd.world.width/2-25, fyd.world.height/2-25, 50, 50);
-
-        fyd.analog = fyd.phaser.add.sprite(fyd.world.width/2, fyd.world.height/2, 'analog');
-        fyd.analog.width = 8;
-        fyd.analog.alpha = 1;
-        fyd.analog.anchor.setTo(0.5, 0.0);
-        fyd.analog.height = fyd.ropeLength;
-
-        fyd.player = new Player({
-            spriteId : 'player',
-            width : fyd.world.width/2,
-            height : fyd.world.height/2
-        });
-        fyd.player.setWidth( fyd.player.getWidth()*0.2);
-        fyd.player.setHeight( fyd.player.getHeight()*0.2);
-        fyd.player.enablePhysics(true);
-        fyd.player.getSprite().anchor.setTo(0.5, 0);
-
-        fyd.physics.rcm.constrain( fyd.physics.rope, fyd.physics.center, fyd.ropeLength );
-        fyd.physics.ropeConstraint = fyd.physics.rcm.constrain( fyd.player.getBody(), fyd.physics.rope, 4.5 );
-
-        fyd.phaser.input.mouse.mouseUpCallback = fyd.inputUp;
-        fyd.player.follow();
-*/
 
         // GRAPHICS
         //
@@ -192,7 +141,7 @@ fyd = {
 
                     fyd.dude.handsToRopeConstraint = fyd.physics.rcm.distanceConstraint(
                         c.bodyA,
-                        c.bodyA,
+                        c.bodyB,
                         0.5,
                         2*r_tmp
                     );
@@ -242,18 +191,7 @@ fyd = {
     },
 
     update : function() {
-/*
-         var distance = fyd.phaser.physics.distanceToXY(fyd.player.getSprite(), fyd.world.width/2, fyd.world.height/2);
-        var theta = fyd.phaser.physics.angleToXY(fyd.player.getSprite(), fyd.world.width/2, fyd.world.height/2);
 
-        if (distance <= fyd.ropeLength + 1)
-        {
-            fyd.analog.height = distance;
-            fyd.analog.alpha = 0.5;
-            fyd.analog.rotation = theta + Math.PI/2;
-        }
-        fyd.analog.alpha = 0.5;
-        */
     },
 
     inputDown : function() {
@@ -283,3 +221,4 @@ fyd = {
 
 };
 
+*/
