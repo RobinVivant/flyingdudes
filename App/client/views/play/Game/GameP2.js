@@ -88,7 +88,7 @@ fyd = {
 
         fyd.dude= new Circle({
             radius : r_tmp,
-            mass : 10
+            mass : 7
         });
         fyd.dude.follow();
         fyd.dude.onSleep(function(){
@@ -116,10 +116,10 @@ fyd = {
             // spacebar
             if( fyd.gfx.input.keyboard.isDown(32) ){
                 var x = 1;
-                var coef = 100;
+                var coef = 200;
                 if( fyd.dude.getBody().velocity[0] < 0 )
                     x = -1;
-                fyd.dude.getBody().applyForce( [coef*x, coef] );
+                fyd.dude.getBody().applyForce( [coef*x*0.5, 2*coef], fyd.dude.getBody().position);
             }
         });
 
