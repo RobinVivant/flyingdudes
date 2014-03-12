@@ -88,8 +88,9 @@ fyd = {
             var duration = new Date().getTime() - fyd.onMouseDownDate;
 
             if(duration > fyd.mouseDownDurationLimit){
-                fyd.dude.ropeConstraint = fyd.dude.setDistanceTo(fyd.bar, 0);
                 fyd.launched = false;
+                fyd.dude.ropeConstraint = fyd.dude.setDistanceTo(fyd.bar, 0);
+
                 fyd.onMouseDownDate = -1;
                 //fyd.ticker.unsubscribe(fyd.whenMouseDown);
             }
@@ -106,7 +107,9 @@ fyd = {
         var duration = new Date().getTime() - fyd.onMouseDownDate;
 
         if(duration < fyd.mouseDownDurationLimit){
-            if( !fyd.launched ){
+            // TODO : pb de concurence ici avec WhenMouseDown,
+            // ligne : fyd.launched = false;
+                console.log("");
                 fyd.launching = true;
                 fyd.launched = true;
 
@@ -114,10 +117,9 @@ fyd = {
 
                 setTimeout(function(){
                     fyd.launching = false;
-                },fyd.mouseDownDurationLimit-1)
+                },fyd.mouseDownDurationLimit-1);
             }else
                 fyd.jump();
-        }
 
         fyd.onMouseDownDate = -1;
     },
