@@ -14,6 +14,7 @@ Template.play.created = function(){
 };
 
 Template.play.destroyed = function(){
+    fyd.delete();
     $("#theDudeImg").show(500);
 };
 

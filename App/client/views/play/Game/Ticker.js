@@ -47,6 +47,7 @@
     function stop(){
 
         active = false;
+        listeners = [];
     }
 
     /**

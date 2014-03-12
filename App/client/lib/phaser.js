@@ -17334,12 +17334,12 @@ Phaser.InputHandler.prototype = {
             //  Only release the InputUp signal if the pointer is still over this sprite
             if (this.checkPointerOver(pointer))
             {
-                //  Release the inputUp signal and provide optional parameter if pointer is still over the sprite or not
+                //  Release the onMouseUp signal and provide optional parameter if pointer is still over the sprite or not
                 this.sprite.events.onInputUp.dispatch(this.sprite, pointer, true);
             }
             else
             {
-                //  Release the inputUp signal and provide optional parameter if pointer is still over the sprite or not
+                //  Release the onMouseUp signal and provide optional parameter if pointer is still over the sprite or not
                 this.sprite.events.onInputUp.dispatch(this.sprite, pointer, false);
 
                 //  Pointer outside the sprite? Reset the cursor

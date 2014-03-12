@@ -2,12 +2,12 @@
 Circle = function(I) {
 
     var self = {
-        shape : new p2.Circle(I.radius/fyd.phxToGfxScaleFactor || 1),
+        shape : new p2.Circle(I.radius/fyd.gfxScaleFactor || 1),
         body : new p2.Body({
             mass: I.mass || 0,
             position:[
-                I.x/fyd.phxToGfxScaleFactor || 0,
-                (fyd.cfg.world.height-I.y)/fyd.phxToGfxScaleFactor || 0]
+                I.x/fyd.gfxScaleFactor || 0,
+                (fyd.cfg.world.height-I.y)/fyd.gfxScaleFactor || 0]
         }),
         sprite : fyd.gfx.add.sprite(I.x || 0, I.y || 0, 'circle'),
         sleepCallback : function(){}
@@ -33,8 +33,9 @@ Circle = function(I) {
     fyd.phx.addBody(self.body);
 
     fyd.ticker.subscribe(function(time, delta){
-        self.sprite.x = self.body.position[0]*fyd.phxToGfxScaleFactor;
-        self.sprite.y = fyd.cfg.world.height-(self.body.position[1]*fyd.phxToGfxScaleFactor);
+        self.sprite.x = self.body.position[0]*fyd.gfxScaleFactor;
+        self.sprite.y = fyd.cfg.world.height-(self.body.position[1]*fyd.gfxScaleFactor);
+        self.sprite.angle = -self.body.angle*fyd.gfxScaleFactor;
     });
 
     return {
@@ -55,7 +56,7 @@ Circle = function(I) {
             self.sleepCallback = callback;
         },
         setDistanceTo : function(element, distance){
-            var c = new p2.DistanceConstraint(self.body,element.getBody(), distance/fyd.phxToGfxScaleFactor);
+            var c = new p2.DistanceConstraint(self.body,element.getBody(), distance/fyd.gfxScaleFactor);
             fyd.phx.addConstraint(c);
             return c;
         }
