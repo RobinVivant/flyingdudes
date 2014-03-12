@@ -4,7 +4,7 @@ var config = {
         width : 800,
         height : 600
     },
-    ropeLength : 250
+    ropeLength : 200
 };
 
 $.extend(fyd.cfg,config);

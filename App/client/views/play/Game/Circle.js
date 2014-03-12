@@ -3,14 +3,32 @@ Circle = function(I) {
 
     var self = {
         shape : new p2.Circle(I.radius/fyd.phxToGfxScaleFactor || 1),
-        body : new p2.Body({ mass: I.mass || 0, position:[I.x/fyd.phxToGfxScaleFactor || 0, (fyd.cfg.world.height-I.y)/fyd.phxToGfxScaleFactor || 0] }),
-        sprite : fyd.gfx.add.sprite(I.x || 0, I.y || 0, 'circle')
+        body : new p2.Body({
+            mass: I.mass || 0,
+            position:[
+                I.x/fyd.phxToGfxScaleFactor || 0,
+                (fyd.cfg.world.height-I.y)/fyd.phxToGfxScaleFactor || 0]
+        }),
+        sprite : fyd.gfx.add.sprite(I.x || 0, I.y || 0, 'circle'),
+        sleepCallback : function(){}
     };
 
     self.sprite.width = 2*I.radius || 1;
     self.sprite.height = 2*I.radius || 1;
-    self.sprite.anchor.setTo(0.5, 0.5);
 
+    self.body.allowSleep = true;
+    self.body.sleepSpeedLimit = fyd.phx.sleepSpeedLimit;
+    self.body.sleepTimeLimit = fyd.phx.sleepTimeLimit;
+
+    self.body.on("sleep",function(event){
+        if( typeof self.sleepCallback === 'function' )
+            self.sleepCallback();
+    });
+
+    if(I.fixed)
+        self.body.motionState = p2.Body.KINEMATIC;
+
+    self.sprite.anchor.setTo(0.5, 0.5);
     self.body.addShape(self.shape);
     fyd.phx.addBody(self.body);
 
@@ -32,6 +50,14 @@ Circle = function(I) {
 
         follow: function () {
             fyd.gfx.camera.follow(self.sprite, Phaser.Camera.FOLLOW_TOPDOWN);
+        },
+        onSleep : function( callback ){
+            self.sleepCallback = callback;
+        },
+        setDistanceTo : function(element, distance){
+            var c = new p2.DistanceConstraint(self.body,element.getBody(), distance/fyd.phxToGfxScaleFactor);
+            fyd.phx.addConstraint(c);
+            return c;
         }
     };
 }

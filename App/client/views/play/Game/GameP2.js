@@ -18,8 +18,13 @@ function create() {
     fyd.phx.solver.relaxation = 3;
     fyd.phx.solver.iterations = 20;
 
+    fyd.phx.enableBodySleeping = true;
+    fyd.phx.sleepSpeedLimit = 0.0001; // Body will feel sleepy if speed<1 (speed is the norm of velocity)
+    fyd.phx.sleepTimeLimit = 1;
+
+
     fyd.ticker.subscribe(function(time, delta){
-        fyd.phx.step(1/60.0);
+        fyd.phx.step(1/60.0, delta);
     });
 
     // NE PAS METTRE CES DEUX LIGNES PLUS LOIN
@@ -74,13 +79,51 @@ fyd = {
     },
 
     loadLevel : function(){
-        fyd.dude= new Circle({
+        fyd.rope= new Circle({
             radius : r_tmp,
-            mass : 10,
+            fixed : true,
             x : fyd.cfg.world.width/2,
             y : fyd.cfg.world.height/2
         });
+
+        fyd.dude= new Circle({
+            radius : r_tmp,
+            mass : 10
+        });
         fyd.dude.follow();
+        fyd.dude.onSleep(function(){
+            console.log("The Dude is dead !");
+        });
+
+        fyd.dude.setDistanceTo(fyd.rope, fyd.cfg.ropeLength);
+
+        fyd.gfx.input.keyboard.onDownCallback = function(event){
+
+            // enter
+            if( event.keyCode == 13  ){
+                fyd.dude.handsToRopeConstraint = fyd.physics.rcm.distanceConstraint(
+                    fyd.dude.hands.getShape(),
+                    fyd.rope.edge.getShape(),
+                    0.5,
+                    2*r_tmp
+                );
+                fyd.launched = false;
+            }
+        }
+
+        fyd.ticker.subscribe(function(time, delta){
+
+            // spacebar
+            if( fyd.gfx.input.keyboard.isDown(32) ){
+                var x = 1;
+                var coef = 100;
+                if( fyd.dude.getBody().velocity[0] < 0 )
+                    x = -1;
+                fyd.dude.getBody().applyForce( [coef*x, coef] );
+            }
+        });
+
+
     },
 
     setBounds : function(width, height){
