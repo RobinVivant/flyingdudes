@@ -1,4 +1,4 @@
-
+/*
 Session.set('phaserLoaded', false);
 
 var r_tmp = 10;
@@ -247,3 +247,4 @@ fyd = {
 
 };
 
+*/
