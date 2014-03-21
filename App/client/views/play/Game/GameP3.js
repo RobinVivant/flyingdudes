@@ -91,20 +91,26 @@ fyd = {
 
         fyd.rope = {};
         fyd.rope.center = fyd.phaser.add.sprite(fyd.cfg.world.width/2, fyd.cfg.world.height/2, 'circle');
-        fyd.phaser.physics.p2.enable(fyd.rope.center, false);
+        fyd.phaser.physics.p2.enable(fyd.rope.center, true);
         fyd.rope.center.width = 30;
         fyd.rope.center.height = 30;
         fyd.rope.center.body.setCircle(15);
-        fyd.rope.center.body.motionState = p2.Body.KINEMATIC;
+
+        fyd.rope.center.body.data.mass = 0;
+        //fyd.rope.center.body.static = true;
+        fyd.rope.center.body.data.motionState = 2; //p2.Body.STATIC;
 
         fyd.dude = fyd.phaser.add.sprite(fyd.cfg.world.width/2, fyd.cfg.world.height/2, 'player');
-        fyd.phaser.physics.p2.enable(fyd.dude, false);
+        fyd.phaser.physics.p2.enable(fyd.dude, true);
         fyd.dude.scale.set(0.5);
         fyd.dude.body.setCircle(fyd.dude.height/2);
 
         var constraint = fyd.phaser.physics.p2.createDistanceConstraint(fyd.dude, fyd.rope.center, fyd.cfg.ropeLength);
 
-        //p2.DistanceConstraint.call(fyd.phaser.physics.p2, fyd.dude.body.data, fyd.rope.center.body.data, 150);
+        fyd.dude.body.velocity.x = 100;
+        fyd.dude.body.velocity.y = 1000;
+
+
 
         fyd.phaser.camera.follow(fyd.dude);
 
