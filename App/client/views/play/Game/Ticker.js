@@ -101,7 +101,7 @@
     }
 
     // API
-    fyd.ticker = {
+    ticker = {
         start: start,
         stop: stop,
         subscribe: subscribe,
