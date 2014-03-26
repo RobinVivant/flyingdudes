@@ -1,4 +1,4 @@
-/*
+
 Session.set('phaserLoaded', false);
 
 
@@ -13,11 +13,8 @@ function create() {
     // NE PAS METTRE CES DEUX LIGNES PLUS LOIN
     fyd.setBounds(fyd.cfg.world.width, fyd.cfg.world.height);
 
-    fyd.phaser.physics.startSystem(Phaser.Physics.P2JS);
-    fyd.phaser.physics.p2.gravity.y = 100;
-
-    fyd.phaser.physics.p2.defaultRestitution = 0.9;
-
+    fyd.phaser.physics.startSystem(Phaser.Physics.ARCADE);
+    fyd.phaser.input.mouse.mouseDownCallback = fyd.onMouseDown;
 
     fyd.loadLevel();
 
@@ -46,9 +43,6 @@ fyd = {
     cfg : {},
     phaser : {},
     bounds : {},
-    CATEGORY_BOUNDS : Math.pow(2,0),
-    CATEGORY_PLAYER : Math.pow(2,1),
-    CATEGORY_ROPE : Math.pow(2,2),
 
     init : function(element){
         fyd.phaser = new Phaser.Game(800, 600, Phaser.CANVAS, element, {
@@ -72,7 +66,7 @@ fyd = {
     },
 
     onMouseDown : function(event){
-
+        fyd.dude.body.velocity.x = 10;
     },
 
     destroy : function(){
@@ -85,31 +79,11 @@ fyd = {
 
         fyd.ticker.subscribe(fyd.whenMouseDown);
 
-        fyd.rope = {};
-        fyd.rope.center = fyd.phaser.add.sprite(fyd.cfg.world.width/2, fyd.cfg.world.height/2, 'circle');
-        fyd.phaser.physics.p2.enable(fyd.rope.center, true);
-        fyd.rope.center.width = 30;
-        fyd.rope.center.height = 30;
-        fyd.rope.center.body.setCircle(15);
-
-        fyd.rope.center.body.data.mass = 0;
-        //fyd.rope.center.body.static = true;
-        fyd.rope.center.body.data.motionState = 2; //p2.Body.STATIC;
-
         fyd.dude = fyd.phaser.add.sprite(fyd.cfg.world.width/2, fyd.cfg.world.height/2, 'player');
-        fyd.phaser.physics.p2.enable(fyd.dude, true);
         fyd.dude.scale.set(0.5);
-        fyd.dude.body.setCircle(fyd.dude.height/2);
-
-        var constraint = fyd.phaser.physics.p2.createDistanceConstraint(fyd.dude, fyd.rope.center, fyd.cfg.ropeLength);
-
-        fyd.dude.body.velocity.x = 100;
-        fyd.dude.body.velocity.y = 1000;
-
-
+        fyd.phaser.physics.arcade.enable(fyd.dude);
 
         fyd.phaser.camera.follow(fyd.dude);
-
 
     },
 
@@ -124,4 +98,3 @@ fyd = {
 
 };
 
-*/
