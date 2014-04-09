@@ -2,7 +2,8 @@
 (function(){
     var lastTime = 0
         ,active = false
-        ,listeners = []
+        ,listeners = [],
+        _context = this
         ;
 
     /**
@@ -23,7 +24,7 @@
 
         for ( var i = 0, l = fns.length; i < l; ++i ){
 
-            fns[ i ]( time, time - lastTime );
+            fns[ i ].call(_context, time, time - lastTime );
         }
 
         lastTime = time;
@@ -33,8 +34,9 @@
      * Start the ticker
      * @return {this}
      */
-    function start(){
+    function start(context){
 
+        _context = context;
         lastTime = (new Date()).getTime();
         active = true;
         step();
@@ -47,7 +49,7 @@
     function stop(){
 
         active = false;
-        listeners = [];
+        //listeners = [];
     }
 
     /**

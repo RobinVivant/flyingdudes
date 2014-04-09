@@ -11,7 +11,7 @@ Fyd = function(element, config){
         // masse
         self.h = 100;
         self.m = 70;
-        self.dudePos = $M([
+        self.dudeState = $M([
             [config.world.width/2],
             [0],
             [config.world.height/2],
@@ -32,6 +32,7 @@ Fyd = function(element, config){
         self.cfg = config;
         self.phaser = {};
         self.bounds = {};
+        self.lastDelta = 0.0;
 
         self.Ad = $M([
             [1,self.Te,0,0],
@@ -47,7 +48,7 @@ Fyd = function(element, config){
             [0, self.erg*self.Te]
         ]);
 
-        self.phaser = new Phaser.Game(800, 600, Phaser.CANVAS, element, self);
+        self.phaser = new Phaser.Game(config.canvas.width, config.canvas.height, Phaser.CANVAS, element, self);
 
     });
 
@@ -67,50 +68,25 @@ Fyd.prototype = {
         this.setBounds(this.cfg.world.width, this.cfg.world.height);
 
         this.phaser.physics.startSystem(Phaser.Physics.ARCADE);
+
         this.phaser.input.mouse.mouseDownCallback = this.onMouseDown;
+        this.phaser.input.mouse.callbackContext = this;
 
         this.loadLevel();
 
         Session.set('scriptsLoaded', true);
-
-        ticker.start();
-
     },
 
     update : function () {
         if( Session.get('scriptsLoaded') == false )
             return;
 
-        if( this.counter >= this.h)
-            return;
 
-        var a_x = this.cmd.e(this.counter,1);
-        var a_y = this.cmd.e(this.counter+1,1)+ this.gravity/this.erg;
-
-        var Un = $M([
-            [a_x],
-            [a_y-this.gravity/this.erg]
-        ]);
-
-
-        this.dudePos= this.Ad.multiply(this.dudePos).add(this.Bd.multiply(Un));
-
-        this.dude.body.x = this.dudePos.e(1, 1);
-        this.dude.body.y = this.dudePos.e(3, 1);
-
-console.log(this.dude.body.x, this.dude.body.y),
-
-        this.counter+=2;
     },
 
     render: function (){
-        //this.phaser.debug.text(this.cmd.e(counter, 1), 32, 32);
+        //this.phaser.debug.text(this.dude.body.x, 32, 32);
         ////this.phaser.debug.text(this.cmd.e(counter, ), 32, 50);
-
-    },
-
-    whenMouseDown : function(time, delta) {
-
 
     },
 
@@ -120,34 +96,69 @@ console.log(this.dude.body.x, this.dude.body.y),
     },
 
     onMouseDown : function(event){
+console.log(this.phaser.input.mousePointer);
 
+        this.cmd = this.BoucleOuverte(
+            [this.dude.body.x, this.dude.body.y],
+            [2*this.dude.body.x - this.phaser.input.mousePointer.x, this.dude.body.y]//+ 2*(this.cfg.canvas.height - event.pageY)]
+        );
+
+        ticker.start(this);
     },
 
     destroy : function(){
         ticker.stop();
         this.phaser.destroy();
+        Session.set('scriptsLoaded', false);
     },
 
     loadLevel : function(){
 
-        ticker.subscribe(this.whenMouseDown);
-
-        this.dude = this.phaser.add.sprite(this.cfg.world.width/2, this.cfg.world.height/2, 'player');
+        this.dude = this.phaser.add.sprite(this.dudeState.e(1, 1), this.dudeState.e(3, 1), 'player');
         this.dude.scale.set(0.5);
-        this.dude.collideWorldBounds = true;
-        this.phaser.physics.arcade.enable(this.dude);
+
+        this.phaser.physics.enable(this.dude, Phaser.Physics.ARCADE);
+        this.dude.body.collideWorldBounds = true;
+        //this.phaser.physics.arcade.gravity.y = 100;
+
 
         this.phaser.camera.follow(this.dude) ;
 
-        this.cmd = this.BoucleOuverte(
-            [this.cfg.world.width/2, this.cfg.world.height/2],
-            [this.cfg.world.width/2-300, (this.cfg.world.height/2-100)]
-        );
+        ticker.subscribe(this.updateCommand);
 
     },
 
-    jump : function(){
+    updateCommand : function(time, delta){
 
+        if( this.counter > this.h-2){
+            this.counter = 0;
+            ticker.stop();
+        }
+
+/*
+        this.lastDelta = this.lastDelta + parseInt(delta);
+console.log(this.lastDelta);
+        if( this.lastDelta >= this.Te*1000 )
+            this.lastDelta = 0;
+        else
+            return;
+*/
+        //var a_x = this.cmd.e(this.counter,1);
+        //var a_y = this.cmd.e(++this.counter,1)+ this.gravity/this.erg;
+
+        var Un = $M([
+            [a_x],
+            [a_y-this.gravity/this.erg]
+        ]);
+
+        this.dudeState= this.Ad.multiply(this.dudeState).add(this.Bd.multiply(Un));
+
+        this.dude.body.velocity.setTo(this.dudeState.e(2, 1), this.dudeState.e(4, 1));
+/*
+        this.dude.x = this.dudeState.e(1, 1);
+        this.dude.y = this.dudeState.e(3, 1);
+*/
+        this.counter++;
     },
 
     setBounds : function(width, height){
@@ -171,26 +182,22 @@ console.log(this.dude.body.x, this.dude.body.y),
             [goalPos[1]],
             [0]
         ]);
-
-
-
         var Cd = $M([
             [1,0,0,0],
             [0,1,0,0],
             [0,0,1,0],
             [0,0,0,1]
-        ]); //lld('c');
+        ]);
 
         // Calcul de la matrice de gouvernabilité G
         var G = this.Bd;
-        for (var n = 1; n <= this.h-1; n++ ) {
+        for (var n = 1; n < this.h; n++ ) {
             var tmpAd = this.Ad
             for (var t = 0; t < n; t++) {
                 tmpAd = tmpAd.multiply(this.Ad);
             }
             G = tmpAd.multiply(this.Bd).augment(G);
         }
-
 
         if (G.rank() < this.Ad.rows()) {
             console.log("Pas de solutions");
@@ -205,19 +212,7 @@ console.log(this.dude.body.x, this.dude.body.y),
             var y = Xh.subtract(tmpAd.multiply(X0));
             var Gt = G.transpose();
             var u = Gt.multiply(G.multiply(Gt).inv()).multiply(y);
-            var dimensionsU = u.dimensions();
 
-            // number of rows are the number of commands
-
-
-            // vecteur des commandes ax et ay des reacteurs
-            /*
-             var a = u;
-             for (var i = 1; i <= h; i++) {
-             a[2*n] = a[2*n] + gravity/erg;
-             }
-             */
-            // pour avoir sous forme d'un tableau
             return u;
         }
     }
