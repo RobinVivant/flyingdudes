@@ -1,4 +1,4 @@
-
+/**
 Session.set('scriptsLoaded', false);
 
 Template.leroux.helpers({
@@ -178,4 +178,4 @@ Leroux.prototype = {
 
 
 
-
+**/
