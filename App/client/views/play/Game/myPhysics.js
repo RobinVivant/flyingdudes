@@ -12,9 +12,6 @@ MyPhysics = function(){
 
     this.Te = 0.04;
     this.time=0;
-    var h = 10;
-
-    var Tvol=h*this.Te;
 
     this.mvide;          // masse à vide (kg)
     this.mfuel;           // masse de carburant (kg)
