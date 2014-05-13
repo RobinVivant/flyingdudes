@@ -3,7 +3,8 @@
     var lastTime = 0
         ,active = false
         ,listeners = [],
-        _context = this
+        _context = this,
+        dt = 1000/60
         ;
 
     /**
@@ -20,7 +21,7 @@
             return;
         }
 
-        window.requestAnimationFrame( step );
+        window.setTimeout( step, _dt );
 
         for ( var i = 0, l = fns.length; i < l; ++i ){
 
@@ -34,8 +35,8 @@
      * Start the ticker
      * @return {this}
      */
-    function start(context){
-
+    function start(context,dt){
+        _dt = dt;
         _context = context;
         lastTime = (new Date()).getTime();
         active = true;

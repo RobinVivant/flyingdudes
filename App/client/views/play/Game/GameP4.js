@@ -10,16 +10,16 @@ Fyd = function(element, config){
 
         // masse
         self.h = 100;
-        self.m = 70;
+        self.m = 1;
         self.dudeState = $M([
             [config.world.width/2],
             [0],
             [config.world.height/2],
             [0]
         ]);
-        self.ve = 4500; // vitesse appliquee par le joueur - ve = puissance
+        self.ve = 45; // vitesse appliquee par le joueur - ve = puissance
         self.erg = self.ve/self.m; // note epsilon en cours
-        self.gravity = 9.8;
+        self.gravity = 9.8*7; //*7 ?
         self.Te = 1/60;
         self.counter = 0;
 
@@ -72,9 +72,19 @@ Fyd.prototype = {
         this.phaser.input.mouse.mouseDownCallback = this.onMouseDown;
         this.phaser.input.mouse.callbackContext = this;
 
+        this.phaser.input.keyboard.addKey(Phaser.Keyboard.LEFT)
+            .onDown.add(this.actionOnLeft, this);
+        this.phaser.input.keyboard.addKey(Phaser.Keyboard.RIGHT)
+            .onDown.add(this.actionOnRight, this);
+        this.phaser.input.keyboard.addKey(Phaser.Keyboard.UP)
+            .onDown.add(this.actionOnUp, this);
+        this.phaser.input.keyboard.addKey(Phaser.Keyboard.DOWN)
+            .onDown.add(this.actionOnDown, this);
+
         this.loadLevel();
 
         Session.set('scriptsLoaded', true);
+
     },
 
     update : function () {
@@ -87,6 +97,20 @@ Fyd.prototype = {
     render: function (){
         //this.phaser.debug.text(this.dude.body.x, 32, 32);
         ////this.phaser.debug.text(this.cmd.e(counter, ), 32, 50);
+    },
+
+    actionOnLeft : function(event) {
+    },
+
+    actionOnRight : function(event) {
+
+    },
+
+    actionOnUp : function(event) {
+
+    },
+
+    actionOnDown : function(event) {
 
     },
 
@@ -96,14 +120,17 @@ Fyd.prototype = {
     },
 
     onMouseDown : function(event){
-console.log(this.phaser.input.mousePointer);
 
+        console.log("x : " + this.dude.body.x);
+        console.log("y : " + this.dude.body.y);
+        console.log("mouseX : " + this.phaser.input.mousePointer.x);
+        console.log("mouseY : " + this.phaser.input.mousePointer.y);
         this.cmd = this.BoucleOuverte(
-            [this.dude.body.x, this.dude.body.y],
-            [2*this.dude.body.x - this.phaser.input.mousePointer.x, this.dude.body.y]//+ 2*(this.cfg.canvas.height - event.pageY)]
+            [this.dude.body.x, -this.dude.body.y],
+            [this.phaser.input.mousePointer.x, -this.phaser.input.mousePointer.y]
         );
 
-        ticker.start(this);
+        ticker.start(this, 200);
     },
 
     destroy : function(){
@@ -131,34 +158,31 @@ console.log(this.phaser.input.mousePointer);
     updateCommand : function(time, delta){
 
         if( this.counter > this.h-2){
+            console.log("FINI !");
             this.counter = 0;
             ticker.stop();
         }
+        else {
 
-/*
-        this.lastDelta = this.lastDelta + parseInt(delta);
-console.log(this.lastDelta);
-        if( this.lastDelta >= this.Te*1000 )
-            this.lastDelta = 0;
-        else
-            return;
-*/
-        //var a_x = this.cmd.e(this.counter,1);
-        //var a_y = this.cmd.e(++this.counter,1)+ this.gravity/this.erg;
+            var a_x = this.cmd.e(this.counter * 2 + 1, 1);
+            var a_y = this.cmd.e(++this.counter * 2 + 2, 1) + this.gravity / this.erg;
 
-        var Un = $M([
-            [a_x],
-            [a_y-this.gravity/this.erg]
-        ]);
+            var Un = $M([
+                [a_x],
+                [a_y - this.gravity / this.erg]
+            ]);
 
-        this.dudeState= this.Ad.multiply(this.dudeState).add(this.Bd.multiply(Un));
+            this.dudeState = this.Ad.multiply(this.dudeState).add(this.Bd.multiply(Un));
 
-        this.dude.body.velocity.setTo(this.dudeState.e(2, 1), this.dudeState.e(4, 1));
-/*
-        this.dude.x = this.dudeState.e(1, 1);
-        this.dude.y = this.dudeState.e(3, 1);
-*/
-        this.counter++;
+            //console.log("e1 : " + this.dudeState.e(1, 1) + "e2 : " + this.dudeState.e(2, 1) + "e3 : " + this.dudeState.e(3, 1) + "e4 : " + this.dudeState.e(4, 1))
+            console.log("Acceleration : x = " + a_x + "\ny = " + a_y);
+            this.dude.body.acceleration.setTo(a_x / 1, -a_y / 1);
+
+            this.dude.body.x = this.dudeState.e(1, 1);
+            this.dude.body.y = -this.dudeState.e(3, 1);
+
+            this.counter++;
+        }
     },
 
     setBounds : function(width, height){
@@ -192,29 +216,32 @@ console.log(this.lastDelta);
         // Calcul de la matrice de gouvernabilité G
         var G = this.Bd;
         for (var n = 1; n < this.h; n++ ) {
-            var tmpAd = this.Ad
-            for (var t = 0; t < n; t++) {
-                tmpAd = tmpAd.multiply(this.Ad);
-            }
+            var tmpAd = this.power(this.Ad,n);
             G = tmpAd.multiply(this.Bd).augment(G);
         }
 
         if (G.rank() < this.Ad.rows()) {
-            console.log("Pas de solutions");
+            console.log("Erreur : Pas de solutions");
         }
         else {
-            console.log("Calcul d'une solution");
             var tmpAd = this.Ad;
             for (var t = 0; t < this.h; t++) {
                 tmpAd = tmpAd.multiply(this.Ad);
             }
 
-            var y = Xh.subtract(tmpAd.multiply(X0));
+            var y = Xh.subtract(this.power(this.Ad,this.h).multiply(X0));
             var Gt = G.transpose();
-            var u = Gt.multiply(G.multiply(Gt).inv()).multiply(y);
-
+            var u = Gt.multiply(G.multiply(Gt).inverse()).multiply(y);
             return u;
         }
+    },
+
+    power : function(matrice,pow){
+        var res=matrice;
+        for(var i= 1;i<pow;i++){
+            res=res.multiply(matrice);
+        }
+        return res;
     }
 
 };
