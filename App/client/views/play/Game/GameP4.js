@@ -2,6 +2,7 @@ Session.set('scriptsLoaded', false);
 
 const aps = 0.5;
 var m2p = 7;
+var augmentFuel = 1000;
 Fyd = function(element, config){
 
     var self = this;
@@ -12,14 +13,17 @@ Fyd = function(element, config){
         self.h = 50;
         self.dudeState = null;
         self.ve = 45*m2p; // vitesse appliquee par le joueur - ve = puissance
-        self.mfuel = 10;
-        self.mvide = 100;
-        self.m  = self.mvide + self.mfuel;
+        self.mfuel = 1 * augmentFuel;
+        self.mvide = 50;
+        self.m  = self.mvide + self.mfuel / augmentFuel ;
         self.erg = self.ve/self.m; // note epsilon en cours
         self.gravity = 9.8*m2p; //*7 ?
         self.Te = 0.04;
         self.counter = 0;
-        self.maxThrust = 5*m2p;
+        self.maxThrust = 10*m2p;
+
+        self.TargetsCoordinates = [500,250,800,200,1300,500,1800,300,2400,350,2900,400];
+        self.TargetsReached = [false, false, false, false, false, false];
 
         self.launched = false;
         self.launching = false;
@@ -32,6 +36,7 @@ Fyd = function(element, config){
         self.bounds = {};
         self.lastDelta = 0.0;
 
+        self.btn_reset = null;
         self.lbl_infos = null;
         self.cursors = null;
 
@@ -54,6 +59,8 @@ Fyd = function(element, config){
 
         self.dataBoucleOuverte = {counter:0,uCom:null, isRunning:false, isLaunched:false};
 
+        self.autoMode = {isLaunched:false, counter:0, nbTargets:6};
+
         self.phaser = new Phaser.Game(config.canvas.width, config.canvas.height, Phaser.CANVAS, element, self);
 
     });
@@ -63,10 +70,11 @@ Fyd = function(element, config){
 Fyd.prototype = {
 
     preload : function(){
-        this.phaser.load.image('background','assets/sprites/starfield.jpg');
+        this.phaser.load.image('background','assets/sprites/background.png');
         this.phaser.load.image('player','assets/sprites/the_dude.png');
         this.phaser.load.image('analog', 'assets/sprites/fusia.png');
         this.phaser.load.image('circle', 'assets/sprites/circle.png');
+        this.phaser.load.spritesheet('btn_reset', 'assets/reset-button.png', 125, 52);
     },
 
     create : function(){
@@ -83,35 +91,50 @@ Fyd.prototype = {
 
         this.observState();
 
+        this.phaser.physics.arcade.overlap(this.dude, this.groupSpriteTargets, this.actionOnCollision, null, this);
+
+        if (this.autoMode.isLaunched) {
+            if (this.autoMode.counter != this.autoMode.nbTargets*2) {
+                if (!this.dataBoucleOuverte.isLaunched) {
+                    this.dataBoucleOuverte.isLaunched = true;
+                    this.BoucleOuverte(
+                        this.dudeState,
+                        [this.TargetsCoordinates[this.autoMode.counter], -this.TargetsCoordinates[this.autoMode.counter + 1]]
+                    );
+                }
+            }
+            else {
+                this.autoMode.isLaunched = false;
+                this.autoMode.counter = 0;
+                //console.log ("You Win. Cheater.");
+            }
+        }
+
         if(this.phaser.input.activePointer.isDown) {
             if(!this.dataBoucleOuverte.isLaunched) {
                 this.dataBoucleOuverte.isLaunched = true;
-                console.log("LAUNCHED");
                 this.BoucleOuverte(
                     this.dudeState,
-                    [this.phaser.input.mousePointer.x, -this.phaser.input.mousePointer.y]
+                    [this.phaser.input.mousePointer.worldX, -this.phaser.input.mousePointer.worldY]
                 );
             }
         }
 
-        //si il n'y a pas de commande en cours --> commande manuelle
         if(!this.dataBoucleOuverte.isRunning) {
 
-            if (this.dude.body.onFloor()) {
-                if (this.cursors.left.isDown) {
-                    this.aCom.y = 0;
-                    this.aCom.x = Math.abs(this.maxThrust) > Math.abs(this.aCom.x) ? this.aCom.x - aps : -this.maxThrust;
+            // A little bit better
+            if (this.cursors.right.isDown && this.cursors.up.isDown) {
+                this.aCom.y = Math.abs(this.maxThrust) > Math.abs(this.aCom.y) ? this.aCom.y + aps : this.maxThrust;
+                this.aCom.x = Math.abs(this.maxThrust) > Math.abs(this.aCom.x) ? this.aCom.x + aps : this.maxThrust;
+            }
 
-                }
-                else if (this.cursors.right.isDown) {
-                    this.aCom.y = 0;
-                    this.aCom.x = Math.abs(this.maxThrust) > Math.abs(this.aCom.x) ? this.aCom.x + aps : this.maxThrust;
-
-                }
+            // A little bit better
+            if (this.cursors.left.isDown && this.cursors.up.isDown) {
+                this.aCom.y = Math.abs(this.maxThrust) > Math.abs(this.aCom.y) ? this.aCom.y + aps : this.maxThrust;
+                this.aCom.x = Math.abs(this.maxThrust) > Math.abs(this.aCom.x) ? this.aCom.x - aps : -this.maxThrust;
             }
 
             if (this.cursors.left.isDown) {
-                this.dude.body.angle += 10;
                 this.aCom.y = 0;
                 this.aCom.x = Math.abs(this.maxThrust) > Math.abs(this.aCom.x) ? this.aCom.x - aps : -this.maxThrust;
             }
@@ -142,6 +165,7 @@ Fyd.prototype = {
             else {
                 this.dataBoucleOuverte.isRunning = false;
                 this.dataBoucleOuverte.isLaunched = false;
+                this.autoMode.counter+=2;
             }
         }
 
@@ -181,19 +205,30 @@ Fyd.prototype = {
         this.dude.body.x = this.dudeState.e(1, 1);
         this.dude.body.y = -this.dudeState.e(3, 1);
 
-        var gr = this.aCom.x + this.aCom.y != 0 ? Math.sqrt(this.aCom.x * this.aCom.x + Math.pow(this.aCom.y + this.gravity, 2)) : 0;
+        var gr;
+        if (this.aCom.x + this.aCom.y != 0) {
+            gr = Math.sqrt(this.aCom.x * this.aCom.x + Math.pow(this.aCom.y + this.gravity, 2))
+        }
+        else {
+            gr = 0;
+        }
         this.cConso += (gr / this.erg) * this.Te;
         this.mfuel -= (gr / this.erg) * this.Te;
 
-        this.lbl_infos.text = "Position\n\tx : " + this.dudeState.e(1,1).toPrecision(4) + "\n\ty : " + this.dudeState.e(3,1).toPrecision(4) + "\n" +
-            "Carburant consomme : " + this.cConso.toPrecision(4) + "\nCarburant restant : " + this.mfuel.toPrecision(4);
+        this.lbl_infos.text = "Position : \n     x : " + this.dudeState.e(1,1).toPrecision(4) + "\n     y : " + this.dudeState.e(3,1).toPrecision(4) + "\n" +
+            "Carburant consomme : " + this.cConso.toPrecision(4) + "\nCarburant restant : " + this.mfuel.toPrecision(8);
     },
 
     observState : function() {
 
-        this.m = this.mvide + this.mfuel;  // masse totale
-        this.erg = this.ve/this.m;          // noté epsilon dans le cours,
-        //accélération horizontale = erg*ax, verticale erg*ay, erg ~= 0.5878
+        if (this.mfuel > 0) {
+            this.m = this.mvide + this.mfuel / augmentFuel;  // masse totale
+        }
+        else {
+            this.m = this.mvide;
+        }
+
+        this.erg = this.ve/this.m; // epsilon
         this.Bd = $M([
             [(this.erg*Math.pow(this.Te,2))/2,0],
             [this.erg*this.Te,0],
@@ -211,48 +246,95 @@ Fyd.prototype = {
         Session.set('scriptsLoaded', false);
     },
 
-    restart: function(matX){
-        console.log("Dans restart");
-        this.dudeState=matX;
-
-        this.dude.body.x = this.dudeState.e(1, 1);
-        this.dude.body.y = -this.dudeState.e(3, 1);
-
-        this.timer.timer.start();
-    },
-
-    reset: function(){
-        console.log("Dans reset");
-        this.dudeState = $M([
-            [this.cfg.world.width/2],[0],
-            [-this.cfg.world.height/2],[0]]);
-
-        this.dude.body.x = this.dudeState.e(1, 1);
-        this.dude.body.y = -this.dudeState.e(3, 1);
-    },
-
-
     loadLevel : function(){
 
-        this.dude = this.phaser.add.sprite(this.cfg.world.width/2, this.cfg.world.height/2, 'player');
+        //this.btn_reset = this.phaser.add.button(650, 550, 'btn_reset', this.actionOnReset, this,0,0,0);
+        //this.btn_reset.fixedToCamera = true;
+
+        this.dude = this.phaser.add.sprite(100, this.cfg.world.height/2, 'player');
         this.dude.scale.set(0.5);
 
         this.phaser.physics.enable(this.dude, Phaser.Physics.ARCADE);
         this.dude.body.collideWorldBounds = true;
         //this.phaser.physics.arcade.gravity.y = 100;
 
-        this.dudeState = $M([[this.dude.body.x],[0],[-this.dude.body.y],[0]]);
+        this.dude.body.anchor = 0.5;
+        this.dudeState = $M([[this.dude.body.x],[100],[-this.dude.body.y],[50]]);
 
         this.observState();
 
         var style = {font : "14 Arial", fill: "White", align: "left"};
-        this.lbl_infos = this.phaser.add.text(100,50,
+        this.lbl_infos = this.phaser.add.text(80,80,
                 "Position\n\tx : " + this.dudeState.e(1,1) + "\n\ty : " + this.dudeState.e(3,1), style);
         this.lbl_infos.anchor.set(0.5);
+        this.lbl_infos.fixedToCamera = true;
 
-        this.phaser.camera.follow(this.dude) ;
+        style = {font : "24 Arial", fill: "Black", align: "right"};
+        this.lbl_shortcuts = this.phaser.add.text(500,500,
+                "Touche A : mode auto (boucle ouverte)\nTouche R : Reset\nFlèches pour se déplacer avec les réacteurs\nClic pour déplacer le dude grâce à la boucle ouverte\n", style);
+        this.lbl_shortcuts.fixedToCamera = true;
+
+        this.phaser.camera.follow(this.dude);
+
+        this.groupSpriteTargets = this.phaser.add.group();
+
+        this.dudeTarget = this.groupSpriteTargets.create(this.TargetsCoordinates[0],this.TargetsCoordinates[1],'circle');
+        this.dudeTarget.scale.set(0.03);
+        this.phaser.physics.enable(this.dudeTarget, Phaser.Physics.ARCADE);
+        this.dudeTarget.body.anchor = 0.5;
+
+
+        this.dudeTarget2 = this.groupSpriteTargets.create(this.TargetsCoordinates[2],this.TargetsCoordinates[3],'circle');
+        this.dudeTarget2.scale.set(0.03);
+        this.phaser.physics.enable(this.dudeTarget2, Phaser.Physics.ARCADE);
+        this.dudeTarget2.body.anchor = 0.5;
+
+        this.dudeTarget3 = this.groupSpriteTargets.create(this.TargetsCoordinates[4],this.TargetsCoordinates[5],'circle');
+        this.dudeTarget3.scale.set(0.03);
+        this.phaser.physics.enable(this.dudeTarget3, Phaser.Physics.ARCADE);
+        this.dudeTarget3.body.anchor = 0.5;
+
+        this.dudeTarget4 = this.groupSpriteTargets.create(this.TargetsCoordinates[6],this.TargetsCoordinates[7],'circle');
+        this.dudeTarget4.scale.set(0.03);
+        this.phaser.physics.enable(this.dudeTarget4, Phaser.Physics.ARCADE);
+        this.dudeTarget4.body.anchor = 0.5;
+
+        this.dudeTarget5 = this.groupSpriteTargets.create(this.TargetsCoordinates[8],this.TargetsCoordinates[9],'circle');
+        this.dudeTarget5.scale.set(0.03);
+        this.phaser.physics.enable(this.dudeTarget5, Phaser.Physics.ARCADE);
+        this.dudeTarget5.body.anchor = 0.5;
+
+        this.dudeTarget6 = this.groupSpriteTargets.create(this.TargetsCoordinates[10],this.TargetsCoordinates[11],'circle');
+        this.dudeTarget6.scale.set(0.03);
+        this.phaser.physics.enable(this.dudeTarget6, Phaser.Physics.ARCADE);
+        this.dudeTarget6.body.anchor = 0.5;
+
+        this.phaser.input.keyboard.addKey(Phaser.Keyboard.R)
+            .onDown.add(this.actionOnReset, this);
+        this.phaser.input.keyboard.addKey(Phaser.Keyboard.A)
+            .onDown.add(this.actionOnAutoMode, this);
 
         this.timer = this.game.time.events.loop(this.Te*1000,this.update,this);
+    },
+
+    actionOnReset : function() {
+        this.cConso  = 0;
+        this.mfuel = augmentFuel;
+        this.dudeState = $M([100,[50],[-300],[0]]);
+        this.groupSpriteTargets.revive(100);
+    },
+
+    actionOnCollision : function(dude, target) {
+        target.kill();
+    },
+
+    actionOnAutoMode : function() {
+        if (!this.autoMode.isLaunched) {
+            this.cConso = 0;
+            this.mfuel = augmentFuel;
+            this.dudeState = $M([100, [50], [-300], [0]]);
+            this.autoMode.isLaunched = true;
+        }
     },
 
     setBounds : function(width, height){

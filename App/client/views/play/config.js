@@ -1,7 +1,7 @@
 
 config = {
     world : {
-        width : 800,
+        width : 3200,
         height : 600
     },
     canvas : {
