@@ -23,7 +23,12 @@ Fyd = function(element, config){
         self.maxThrust = 10*m2p;
 
         self.TargetsCoordinates = [500,250,800,200,1300,500,1800,300,2400,350,2900,400];
-        self.TargetsReached = [false, false, false, false, false, false];
+        self.TargetsReached = 0;
+        self.nbTargets = 6;
+        self.groupSpriteTargets;
+        self.user_highscore = 1000;
+        self.autoModeHighscore = 1000;
+        self.highscoreChanged = false;
 
         self.launched = false;
         self.launching = false;
@@ -38,6 +43,9 @@ Fyd = function(element, config){
 
         self.btn_reset = null;
         self.lbl_infos = null;
+        self.lbl_highscore = null;
+        self.lbl_targetsReached = null;
+        self.lbl_autoModeHighScore = null;
         self.cursors = null;
 
         self.Ad = $M([
@@ -74,6 +82,7 @@ Fyd.prototype = {
         this.phaser.load.image('player','assets/sprites/the_dude.png');
         this.phaser.load.image('analog', 'assets/sprites/fusia.png');
         this.phaser.load.image('circle', 'assets/sprites/circle.png');
+        this.phaser.load.image('quille', 'assets/sprites/quille.png');
         this.phaser.load.spritesheet('btn_reset', 'assets/reset-button.png', 125, 52);
     },
 
@@ -106,7 +115,11 @@ Fyd.prototype = {
             else {
                 this.autoMode.isLaunched = false;
                 this.autoMode.counter = 0;
-                //console.log ("You Win. Cheater.");
+                if (this.autoModeHighscore > this.cConso.toPrecision(4)) {
+                    this.lbl_autoModeHighScore.text = "Score du mode auto : " + this.cConso.toPrecision(4);
+                    this.autoModeHighscore = this.cConso.toPrecision(4);
+                    this.highscoreChanged = true;
+                }
             }
         }
 
@@ -160,7 +173,6 @@ Fyd.prototype = {
                 this.aCom.y = this.dataBoucleOuverte.uCom.e(this.dataBoucleOuverte.counter * 2 + 2, 1) + this.gravity / this.erg;
 
                 this.dataBoucleOuverte.counter += 1;
-                //console.log(this.aCom.x+" "+this.aCom.y);
             }
             else {
                 this.dataBoucleOuverte.isRunning = false;
@@ -216,7 +228,20 @@ Fyd.prototype = {
         this.mfuel -= (gr / this.erg) * this.Te;
 
         this.lbl_infos.text = "Position : \n     x : " + this.dudeState.e(1,1).toPrecision(4) + "\n     y : " + this.dudeState.e(3,1).toPrecision(4) + "\n" +
-            "Carburant consomme : " + this.cConso.toPrecision(4) + "\nCarburant restant : " + this.mfuel.toPrecision(8);
+            "Carburant consommé : " + this.cConso.toPrecision(4) + "\nCarburant restant : " + this.mfuel.toPrecision(8);
+
+        this.lbl_targetsReached.text = "Quilles : " + this.TargetsReached + "/6";
+
+        if (!this.autoMode.isLaunched) {
+            if (!this.highscoreChanged) {
+                if (this.TargetsReached == 6) {
+                    if (this.user_highscore > this.cConso.toPrecision(4)) {
+                        this.lbl_highscore.text = "Tom meilleur score : " + this.cConso.toPrecision(4);
+                        this.user_highscore = this.cConso.toPrecision(4);
+                    }
+                }
+            }
+        }
     },
 
     observState : function() {
@@ -263,49 +288,62 @@ Fyd.prototype = {
 
         this.observState();
 
-        var style = {font : "14 Arial", fill: "White", align: "left"};
-        this.lbl_infos = this.phaser.add.text(80,80,
+        var style = {font : "14px Arial", fill: "White", align: "left"};
+        this.lbl_infos = this.phaser.add.text(100,65,
                 "Position\n\tx : " + this.dudeState.e(1,1) + "\n\ty : " + this.dudeState.e(3,1), style);
         this.lbl_infos.anchor.set(0.5);
         this.lbl_infos.fixedToCamera = true;
 
-        style = {font : "24 Arial", fill: "Black", align: "right"};
-        this.lbl_shortcuts = this.phaser.add.text(500,500,
-                "Touche A : mode auto (boucle ouverte)\nTouche R : Reset\nFlèches pour se déplacer avec les réacteurs\nClic pour déplacer le dude grâce à la boucle ouverte\n", style);
+        var style2 = {font : "14px Arial", fill: "Black", align: "right"};
+        this.lbl_shortcuts = this.phaser.add.text(460,510,
+            "Touche A : mode auto (boucle ouverte)\nTouche R : Reset\nFlèches pour se déplacer avec les réacteurs\nClic pour déplacer le dude grâce à la boucle ouverte\n",
+            style2);
         this.lbl_shortcuts.fixedToCamera = true;
+
+        var style3 = {font : "20px Arial", fill: "Brown", align: "left"};
+        this.lbl_highscore = this.phaser.add.text(550,40, "Ton meilleur score : 0",style3);
+        this.lbl_highscore.fixedToCamera = true;
+
+        var style4 = {font : "20px Arial", fill: "Brown", align: "left"};
+        this.lbl_targetsReached = this.phaser.add.text(10,550, "Quilles : 0/6",style4);
+        this.lbl_targetsReached.fixedToCamera = true;
+
+        var style5 = {font : "20px Arial", fill: "Red", align: "left"};
+        this.lbl_autoModeHighScore = this.phaser.add.text(550,80, "Score du mode auto : 0",style5);
+        this.lbl_autoModeHighScore.fixedToCamera = true;
 
         this.phaser.camera.follow(this.dude);
 
         this.groupSpriteTargets = this.phaser.add.group();
 
-        this.dudeTarget = this.groupSpriteTargets.create(this.TargetsCoordinates[0],this.TargetsCoordinates[1],'circle');
-        this.dudeTarget.scale.set(0.03);
+        this.dudeTarget = this.groupSpriteTargets.create(this.TargetsCoordinates[0],this.TargetsCoordinates[1],'quille');
+        this.dudeTarget.scale.set(0.13);
         this.phaser.physics.enable(this.dudeTarget, Phaser.Physics.ARCADE);
         this.dudeTarget.body.anchor = 0.5;
 
 
-        this.dudeTarget2 = this.groupSpriteTargets.create(this.TargetsCoordinates[2],this.TargetsCoordinates[3],'circle');
-        this.dudeTarget2.scale.set(0.03);
+        this.dudeTarget2 = this.groupSpriteTargets.create(this.TargetsCoordinates[2],this.TargetsCoordinates[3],'quille');
+        this.dudeTarget2.scale.set(0.13);
         this.phaser.physics.enable(this.dudeTarget2, Phaser.Physics.ARCADE);
         this.dudeTarget2.body.anchor = 0.5;
 
-        this.dudeTarget3 = this.groupSpriteTargets.create(this.TargetsCoordinates[4],this.TargetsCoordinates[5],'circle');
-        this.dudeTarget3.scale.set(0.03);
+        this.dudeTarget3 = this.groupSpriteTargets.create(this.TargetsCoordinates[4],this.TargetsCoordinates[5],'quille');
+        this.dudeTarget3.scale.set(0.13);
         this.phaser.physics.enable(this.dudeTarget3, Phaser.Physics.ARCADE);
         this.dudeTarget3.body.anchor = 0.5;
 
-        this.dudeTarget4 = this.groupSpriteTargets.create(this.TargetsCoordinates[6],this.TargetsCoordinates[7],'circle');
-        this.dudeTarget4.scale.set(0.03);
+        this.dudeTarget4 = this.groupSpriteTargets.create(this.TargetsCoordinates[6],this.TargetsCoordinates[7],'quille');
+        this.dudeTarget4.scale.set(0.13);
         this.phaser.physics.enable(this.dudeTarget4, Phaser.Physics.ARCADE);
         this.dudeTarget4.body.anchor = 0.5;
 
-        this.dudeTarget5 = this.groupSpriteTargets.create(this.TargetsCoordinates[8],this.TargetsCoordinates[9],'circle');
-        this.dudeTarget5.scale.set(0.03);
+        this.dudeTarget5 = this.groupSpriteTargets.create(this.TargetsCoordinates[8],this.TargetsCoordinates[9],'quille');
+        this.dudeTarget5.scale.set(0.13);
         this.phaser.physics.enable(this.dudeTarget5, Phaser.Physics.ARCADE);
         this.dudeTarget5.body.anchor = 0.5;
 
-        this.dudeTarget6 = this.groupSpriteTargets.create(this.TargetsCoordinates[10],this.TargetsCoordinates[11],'circle');
-        this.dudeTarget6.scale.set(0.03);
+        this.dudeTarget6 = this.groupSpriteTargets.create(this.TargetsCoordinates[10],this.TargetsCoordinates[11],'quille');
+        this.dudeTarget6.scale.set(0.13);
         this.phaser.physics.enable(this.dudeTarget6, Phaser.Physics.ARCADE);
         this.dudeTarget6.body.anchor = 0.5;
 
@@ -321,11 +359,21 @@ Fyd.prototype = {
         this.cConso  = 0;
         this.mfuel = augmentFuel;
         this.dudeState = $M([100,[50],[-300],[0]]);
-        this.groupSpriteTargets.revive(100);
+
+        this.groupSpriteTargets.getAt(0).reset(this.TargetsCoordinates[0], this.TargetsCoordinates[1]);
+        this.groupSpriteTargets.getAt(1).reset(this.TargetsCoordinates[2], this.TargetsCoordinates[3]);
+        this.groupSpriteTargets.getAt(2).reset(this.TargetsCoordinates[4], this.TargetsCoordinates[5]);
+        this.groupSpriteTargets.getAt(3).reset(this.TargetsCoordinates[6], this.TargetsCoordinates[7]);
+        this.groupSpriteTargets.getAt(4).reset(this.TargetsCoordinates[8], this.TargetsCoordinates[9]);
+        this.groupSpriteTargets.getAt(5).reset(this.TargetsCoordinates[10], this.TargetsCoordinates[11]);
+
+        this.TargetsReached = 0;
+        this.highscoreChanged = false;
     },
 
     actionOnCollision : function(dude, target) {
         target.kill();
+        this.TargetsReached ++;
     },
 
     actionOnAutoMode : function() {
