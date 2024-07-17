@@ -22,12 +22,13 @@ body {
 .cover-container {
   margin: 0 auto;
   width: 100%;
-  max-width: 1200px;
-  padding: 20px;
+  max-width: 800px;
+  padding: 40px 20px;
   box-sizing: border-box;
   flex: 1;
   display: flex;
   flex-direction: column;
+  justify-content: center;
 }
 
 @media (max-width: 768px) {
@@ -118,16 +119,16 @@ body {
 }
 
 .cover {
-  padding: 2rem;
+  padding: 3rem;
   text-align: center;
-  background-color: rgba(255, 255, 255, 0.8);
+  background-color: rgba(255, 255, 255, 0.9);
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  margin: 1rem 0;
+  margin: 2rem 0;
 }
 
 .cover .btn-lg {
-  padding: .75rem 1.25rem;
+  padding: 1rem 1.5rem;
   font-weight: 700;
   background-color: #4CAF50;
   color: white;
@@ -136,7 +137,7 @@ body {
   transition: all 0.3s ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   display: inline-block;
-  margin-top: 1rem;
+  margin-top: 2rem;
 }
 
 .cover .btn-lg:hover {
@@ -160,9 +161,9 @@ body {
   text-align: center;
   background-color: rgba(255, 255, 255, 0.9);
   border-radius: 10px;
-  padding: 1rem;
+  padding: 2rem;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  margin: 1rem 0;
+  margin: 2rem 0;
 }
 
 .game-info {
@@ -215,10 +216,10 @@ body {
 }
 
 .game-instructions {
-  margin-top: 2rem;
+  margin-top: 3rem;
   text-align: left;
   background-color: rgba(255, 255, 255, 0.9);
-  padding: 1.5rem;
+  padding: 2rem;
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
