@@ -9,9 +9,9 @@ class FlyingDudes extends Phaser.Scene {
     this.score = 0;
     this.fuel = 1000;
     this.maxThrust = 10;
-    this.gravity = 9.8;
-    this.Te = 0.04;
-    this.erg = 45;
+    this.gravity = 200;
+    this.Te = 0.016;
+    this.erg = 200;
     this.dudeState = null;
     this.autoMode = { isLaunched: false, counter: 0, nbTargets: 6 };
     this.dataBoucleOuverte = { counter: 0, uCom: null, isRunning: false, isLaunched: false };
@@ -85,21 +85,21 @@ class FlyingDudes extends Phaser.Scene {
 
   handleInput() {
     if (!this.dataBoucleOuverte.isRunning) {
-      const acceleration = 200;
-      const gravity = 100;
+      const acceleration = 300;
+      
+      // Reset acceleration
+      this.player.setAcceleration(0);
 
       if (this.cursors.left.isDown) {
         this.player.setAccelerationX(-acceleration);
       } else if (this.cursors.right.isDown) {
         this.player.setAccelerationX(acceleration);
-      } else {
-        this.player.setAccelerationX(0);
       }
 
       if (this.cursors.up.isDown) {
-        this.player.setAccelerationY(-acceleration - gravity);
+        this.player.setAccelerationY(-acceleration - this.gravity);
       } else {
-        this.player.setAccelerationY(gravity);
+        this.player.setAccelerationY(this.gravity);
       }
 
       this.applyThrust(this.player.body.acceleration);
@@ -110,7 +110,7 @@ class FlyingDudes extends Phaser.Scene {
 
   applyThrust(acceleration) {
     if (this.mfuel > 0) {
-      const fuelConsumption = Math.sqrt(acceleration.x * acceleration.x + acceleration.y * acceleration.y) * this.Te / 1000;
+      const fuelConsumption = Math.sqrt(acceleration.x * acceleration.x + acceleration.y * acceleration.y) * this.Te / 100;
       this.mfuel = Math.max(0, this.mfuel - fuelConsumption);
       this.cConso += fuelConsumption;
 
