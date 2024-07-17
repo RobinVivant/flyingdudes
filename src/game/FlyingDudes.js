@@ -229,19 +229,19 @@ class FlyingDudes extends Phaser.Scene {
   BoucleOuverte(posDude, goalPos) {
     this.dataBoucleOuverte.counter = 0;
 
-    const Xh = math.matrix([goalPos[0], 0, goalPos[1], 0]);
+    const Xh = math.matrix([[goalPos[0]], [0], [goalPos[1]], [0]]);
 
     // Calcul de la matrice de gouvernabilité G
     let G = this.Bd;
     for (let n = 1; n < this.h; n++) {
       const tmpAd = math.pow(this.Ad, n);
-      G = math.concat(G, math.multiply(tmpAd, this.Bd));
+      G = math.concat(G, math.multiply(tmpAd, this.Bd), 1);
     }
 
     if (math.size(G)[0] < math.size(this.Ad)[0]) {
       console.log("Erreur : Pas de solutions");
     } else {
-      const y = math.subtract(Xh, math.multiply(math.pow(this.Ad, this.h), math.matrix(posDude)));
+      const y = math.subtract(Xh, math.multiply(math.pow(this.Ad, this.h), math.matrix([[posDude.get([0])], [posDude.get([1])], [posDude.get([2])], [posDude.get([3])]])));
       const Gt = math.transpose(G);
       const GGtInverse = math.inv(math.multiply(G, Gt));
       this.dataBoucleOuverte.uCom = math.multiply(math.multiply(Gt, GGtInverse), y);
