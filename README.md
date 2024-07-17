@@ -92,26 +92,47 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 - Jean-Paul Stromboni for course supervision
 - The React and Phaser communities for their excellent frameworks and documentation
-# Flying Dudes
+# Flying Dudes: A Blast from the Past!
 
-This project is a Next.js-based web application featuring the "Flying Dudes" game.
+Hey there, fellow time travelers! 👋 Welcome to the Flying Dudes repo, a nostalgic journey back to 2014 when my buddy Antoine and I were just a couple of wide-eyed SI4 students trying to impress our Computer Control prof, Jean-Paul Stromboni.
 
-## Live Demo
+## What's This All About?
 
-You can test the live version of the application at: https://flying-dudes.pages.dev/
+Picture this: It's 2014, Pharrell's "Happy" is playing everywhere, and we're coding like mad to create this wacky game where dudes fly around collecting targets. Why? Because college, that's why! 🎓
 
-## Project History
+Fast forward to today (holy cow, has it really been 10 years?), and I've decided to dust off this old gem and give it a modern makeover with Next.js. Why? Because nostalgia is one hell of a drug, my friends!
 
-The original 2014 version of this project is archived in the "master-2014" branch for historical reference.
+## The Time Machine (aka Live Demo)
 
-## Getting Started
+Wanna see what happens when you mix 2014 creativity with 2024 tech? Check out the live demo at https://flying-dudes.pages.dev/. Warning: May cause uncontrollable urges to relive your college days!
 
-[Add instructions for setting up and running the project locally]
+## A Trip Down Memory Lane
 
-## Contributing
+For those history buffs out there (or if you just want a good laugh), the original 2014 version is safely tucked away in the "master-2014" branch. It's like a digital time capsule, minus the buried-in-the-backyard part.
 
-[Add guidelines for contributing to the project]
+## Fire It Up!
 
-## License
+Feeling nostalgic and want to run this bad boy locally? Here's how:
 
-[Add license information]
+1. Clone this repo (like it's 2014 all over again)
+2. Run `npm install` (some things never change)
+3. Hit it with `npm run dev`
+4. Travel back in time to http://localhost:3000
+
+## Want to Contribute?
+
+Did this blast from the past inspire you? Got some ideas to make Flying Dudes even cooler? Pull requests are welcome! Just remember, with great power comes great responsibility (and potential for adding more flying dudes).
+
+## License to Chill
+
+This project is as free as we thought we were in college. Use it, abuse it, love it. Just maybe buy Antoine and me a beer if you make millions off it, yeah?
+
+---
+
+Shoutout to Antoine Lavail, my partner in crime for this project. Dude, if you're reading this, remember when we thought this would make us the next big thing in gaming? Good times! 🍻
+
+And to Professor Stromboni - I hope we finally nailed that A+ we were gunning for. Better late than never, right?
+
+Here's to code that stands the test of time, friendships forged in the fires of debugging, and the eternal question: "Why the heck did we call it Flying Dudes anyway?"
+
+Keep on flying, dudes and dudettes! 🚀
