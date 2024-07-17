@@ -27,15 +27,15 @@
         leroux = null;
     };
 
+    import { Vector, Matrix } from 'sylvester';
+
     Leroux = function(element, config){
 
         var self = this;
 
-        $.getScript("/js/sylvester.js", function(){
+        self.cfg = config;
 
-            self.cfg = config;
-
-            self.curTime = 0;
+        self.curTime = 0;
 
             self.initPos = {
                 x : config.world.width/2,
