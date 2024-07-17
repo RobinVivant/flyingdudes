@@ -92,3 +92,26 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 - Jean-Paul Stromboni for course supervision
 - The React and Phaser communities for their excellent frameworks and documentation
+# Flying Dudes
+
+This project is a Next.js-based web application featuring the "Flying Dudes" game.
+
+## Live Demo
+
+You can test the live version of the application at: https://flying-dudes.pages.dev/
+
+## Project History
+
+The original 2014 version of this project is archived in the "master-2014" branch for historical reference.
+
+## Getting Started
+
+[Add instructions for setting up and running the project locally]
+
+## Contributing
+
+[Add guidelines for contributing to the project]
+
+## License
+
+[Add license information]
