@@ -30,6 +30,7 @@ class FlyingDudes extends Phaser.Scene {
     this.mvide = 50;
     this.m = this.mvide + this.mfuel / 1000;
     this.h = 50;
+    this.audioContext = null;
   }
 
   preload() {
@@ -80,6 +81,14 @@ class FlyingDudes extends Phaser.Scene {
     this.input.keyboard.on('keydown-A', this.actionOnAutoMode, this);
 
     this.cameras.main.startFollow(this.player);
+
+    // Initialize AudioContext after user interaction
+    this.input.on('pointerdown', () => {
+      this.initAudioContext();
+    });
+    this.input.keyboard.on('keydown', () => {
+      this.initAudioContext();
+    });
   }
 
   update() {
@@ -212,6 +221,7 @@ class FlyingDudes extends Phaser.Scene {
   }
 
   actionOnReset() {
+    this.initAudioContext();
     this.cConso = 0;
     this.mfuel = 1000;
     this.dudeState = math.matrix([100, 50, -300, 0]);
@@ -228,6 +238,15 @@ class FlyingDudes extends Phaser.Scene {
       this.mfuel = 1000;
       this.dudeState = math.matrix([100, 50, -300, 0]);
       this.autoMode.isLaunched = true;
+    }
+  }
+
+  initAudioContext() {
+    if (!this.audioContext) {
+      this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      if (this.audioContext.state === 'suspended') {
+        this.audioContext.resume();
+      }
     }
   }
 
