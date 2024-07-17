@@ -1,6 +1,10 @@
 import Phaser from 'phaser';
 import * as math from 'mathjs';
 
+if (!math || typeof math.matrix !== 'function') {
+  console.error('mathjs is not properly imported or does not have the expected methods');
+}
+
 class FlyingDudes extends Phaser.Scene {
   constructor() {
     super('FlyingDudes');
@@ -75,10 +79,15 @@ class FlyingDudes extends Phaser.Scene {
   }
 
   update() {
-    this.handleInput();
-    this.updateFuelDisplay();
-    this.updateAutoMode();
-    this.observState();
+    try {
+      this.handleInput();
+      this.updateFuelDisplay();
+      this.updateAutoMode();
+      this.observState();
+    } catch (error) {
+      console.error('Error in update:', error);
+      console.trace();
+    }
   }
 
   handleInput() {
@@ -180,19 +189,24 @@ class FlyingDudes extends Phaser.Scene {
   }
 
   observState() {
-    if (this.mfuel > 0) {
-      this.m = this.mvide + this.mfuel / 1000;
-    } else {
-      this.m = this.mvide;
-    }
+    try {
+      if (this.mfuel > 0) {
+        this.m = this.mvide + this.mfuel / 1000;
+      } else {
+        this.m = this.mvide;
+      }
 
-    this.erg = this.erg / this.m;
-    this.Bd = Matrix.create([
-      [(this.erg * Math.pow(this.Te, 2)) / 2, 0],
-      [this.erg * this.Te, 0],
-      [0, (this.erg * Math.pow(this.Te, 2)) / 2],
-      [0, this.erg * this.Te]
-    ]);
+      this.erg = this.erg / this.m;
+      this.Bd = math.matrix([
+        [(this.erg * Math.pow(this.Te, 2)) / 2, 0],
+        [this.erg * this.Te, 0],
+        [0, (this.erg * Math.pow(this.Te, 2)) / 2],
+        [0, this.erg * this.Te]
+      ]);
+    } catch (error) {
+      console.error('Error in observState:', error);
+      console.trace();
+    }
   }
 
   actionOnReset() {
