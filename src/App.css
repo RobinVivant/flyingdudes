@@ -1,0 +1,52 @@
+.site-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.site-wrapper-inner {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.cover-container {
+  margin-right: auto;
+  margin-left: auto;
+  width: 100%;
+  max-width: 960px;
+}
+
+.masthead {
+  margin-bottom: 2rem;
+}
+
+.mastfoot {
+  color: #999;
+  color: rgba(255,255,255,.5);
+}
+
+.inner {
+  padding: 2rem;
+}
+
+.cover {
+  padding: 0 1.5rem;
+}
+
+.cover .btn-lg {
+  padding: .75rem 1.25rem;
+  font-weight: 700;
+}
+
+.play-container {
+  text-align: center;
+}
+
+.game-info {
+  margin-bottom: 1rem;
+}
+
+.game-instructions {
+  margin-top: 1rem;
+}
