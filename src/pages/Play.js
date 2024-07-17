@@ -67,24 +67,26 @@ function Play() {
 
   return (
     <div className="play-container">
-      <h2>Flying Dudes Game</h2>
+      <h2>The Flying Dude's Adventure</h2>
       <div className="game-info">
         <p>Score: {score}</p>
         <p>Fuel: {fuel}</p>
-        <p>Targets Reached: {targetsReached}/6</p>
-        <p>Fuel Consumed: {fuelConsumed.toFixed(2)}</p>
+        <p>Targets: {targetsReached}/6</p>
+        <p>Fuel Used: {fuelConsumed.toFixed(2)}</p>
+      </div>
+      <div className="game-controls">
         <button onClick={handleReset}>Reset Game</button>
         <button onClick={handleAutoMode}>Auto Mode</button>
       </div>
       <div ref={gameRef} id="game-container"></div>
       <div className="game-instructions">
-        <h3>Instructions:</h3>
+        <h3>How to Play:</h3>
         <ul>
-          <li>Use arrow keys to control the dude</li>
-          <li>Collect targets to increase your score</li>
-          <li>Watch your fuel consumption!</li>
-          <li>Press 'R' to reset the game</li>
-          <li>Press 'A' to activate auto mode</li>
+          <li>Use arrow keys to guide The Dude through the air</li>
+          <li>Collect floating targets to increase your score</li>
+          <li>Keep an eye on your fuel - don't run out!</li>
+          <li>Press 'R' to reset the game at any time</li>
+          <li>Try 'A' to activate auto mode and watch The Dude fly solo</li>
         </ul>
       </div>
     </div>

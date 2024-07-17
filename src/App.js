@@ -10,7 +10,12 @@ import './App.css';
 
 function App() {
   return (
-    <div className="site-wrapper">
+    <div className="site-wrapper" style={{
+      backgroundImage: `url(${process.env.PUBLIC_URL}/assets/sprites/background.png)`,
+      backgroundSize: 'cover',
+      backgroundRepeat: 'no-repeat',
+      backgroundAttachment: 'fixed'
+    }}>
       <div className="site-wrapper-inner">
         <div className="cover-container">
           <Header />
