@@ -51,9 +51,7 @@ function Play() {
   }, []);
 
   useEffect(() => {
-    if (!gameInstanceRef.current) {
-      createGame();
-    }
+    createGame();
     const interval = setInterval(updateGameState, 100);
 
     const handleResize = () => {
