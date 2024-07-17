@@ -8,6 +8,8 @@ const nextConfig = {
     })
     return config
   },
+  // Add this to ensure CSS modules work correctly
+  cssModules: true,
 }
 
 module.exports = nextConfig
