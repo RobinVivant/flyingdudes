@@ -10,10 +10,12 @@ const nextConfig = {
   },
   // Add this to ensure CSS modules work correctly
   cssModules: true,
-  // Add this for Cloudflare Pages compatibility
+  // Add this for static export
   output: 'export',
+  // Configure image loader for static export
   images: {
-    unoptimized: true,
+    loader: 'custom',
+    loaderFile: './image-loader.js',
   },
   trailingSlash: true,
 }
