@@ -1,0 +1,16 @@
+{
+  "name": "flying-dudes",
+  "version": "1.0.0",
+  "description": "Flying Dudes game project",
+  "main": "index.js",
+  "scripts": {
+    "start": "meteor run",
+    "test": "meteor test --driver-package practicalmeteor:mocha"
+  },
+  "dependencies": {
+    "meteor-node-stubs": "^1.0.1"
+  },
+  "devDependencies": {},
+  "author": "",
+  "license": "ISC"
+}
