@@ -88,8 +88,6 @@
             self.theta = 0;
 
             self.phaser = new Phaser.Game(config.canvas.width, config.canvas.height, Phaser.CANVAS, element, self);
-        });
-
     };
 
     Leroux.prototype = {
