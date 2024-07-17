@@ -37,8 +37,10 @@ class FlyingDudes extends Phaser.Scene {
     
     this.player = this.physics.add.sprite(100, this.game.config.height / 2, 'player');
     this.player.setCollideWorldBounds(true);
-    this.player.setScale(0.5);
+    this.player.setScale(0.25);
     this.player.setDepth(1);
+    this.player.setDrag(100);
+    this.player.setMaxVelocity(300);
 
     this.cursors = this.input.keyboard.createCursorKeys();
 
@@ -83,38 +85,42 @@ class FlyingDudes extends Phaser.Scene {
 
   handleInput() {
     if (!this.dataBoucleOuverte.isRunning) {
-      const velocity = { x: 0, y: 0 };
+      const acceleration = 200;
+      const gravity = 100;
 
       if (this.cursors.left.isDown) {
-        velocity.x = -this.maxThrust * 10;
+        this.player.setAccelerationX(-acceleration);
       } else if (this.cursors.right.isDown) {
-        velocity.x = this.maxThrust * 10;
+        this.player.setAccelerationX(acceleration);
+      } else {
+        this.player.setAccelerationX(0);
       }
 
       if (this.cursors.up.isDown) {
-        velocity.y = -this.maxThrust * 10;
-      } else if (this.cursors.down.isDown) {
-        velocity.y = this.maxThrust * 10;
+        this.player.setAccelerationY(-acceleration - gravity);
+      } else {
+        this.player.setAccelerationY(gravity);
       }
 
-      this.player.setVelocity(velocity.x, velocity.y);
-      this.applyThrust(velocity);
+      this.applyThrust(this.player.body.acceleration);
     } else {
       this.applyBoucleOuverteThrust();
     }
   }
 
-  applyThrust(velocity) {
+  applyThrust(acceleration) {
     if (this.mfuel > 0) {
-      const fuelConsumption = Math.sqrt(velocity.x * velocity.x + velocity.y * velocity.y) * this.Te / 10;
+      const fuelConsumption = Math.sqrt(acceleration.x * acceleration.x + acceleration.y * acceleration.y) * this.Te / 1000;
       this.mfuel = Math.max(0, this.mfuel - fuelConsumption);
       this.cConso += fuelConsumption;
 
-      const Un = math.matrix([velocity.x / 10, velocity.y / 10 + this.gravity]);
+      const Un = math.matrix([acceleration.x / 100, acceleration.y / 100]);
       const adMultiplyDudeState = math.multiply(this.Ad, this.dudeState);
       const bdMultiplyUn = math.multiply(this.Bd, Un);
       const scaledBdMultiplyUn = math.multiply(bdMultiplyUn, this.erg / this.m);
       this.dudeState = math.add(adMultiplyDudeState, scaledBdMultiplyUn);
+    } else {
+      this.player.setAcceleration(0, this.gravity);
     }
   }
 
@@ -134,8 +140,13 @@ class FlyingDudes extends Phaser.Scene {
   }
 
   updateState() {
-    this.player.setPosition(this.dudeState.get([0]), -this.dudeState.get([2]));
-    this.player.setVelocity(this.dudeState.get([1]), -this.dudeState.get([3]));
+    const x = this.dudeState.get([0]);
+    const y = -this.dudeState.get([2]);
+    const vx = this.dudeState.get([1]);
+    const vy = -this.dudeState.get([3]);
+    
+    this.player.setPosition(x, y);
+    this.player.setVelocity(vx, vy);
   }
 
   createTargets() {
