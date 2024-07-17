@@ -2,7 +2,11 @@ import Phaser from 'phaser';
 import * as math from 'mathjs';
 
 if (!math || typeof math.matrix !== 'function') {
-  console.error('mathjs is not properly imported or does not have the expected methods');
+  console.error('mathjs is not properly imported or does not have the expected methods', new Error().stack);
+}
+
+function debugError(message, error) {
+  console.error(`${message}\nFile: ${__filename}\nLine: ${error.lineNumber}\nStack: ${error.stack}`);
 }
 
 class FlyingDudes extends Phaser.Scene {
@@ -85,8 +89,7 @@ class FlyingDudes extends Phaser.Scene {
       this.updateAutoMode();
       this.observState();
     } catch (error) {
-      console.error('Error in update:', error);
-      console.trace();
+      debugError('Error in update:', error);
     }
   }
 
@@ -204,8 +207,7 @@ class FlyingDudes extends Phaser.Scene {
         [0, this.erg * this.Te]
       ]);
     } catch (error) {
-      console.error('Error in observState:', error);
-      console.trace();
+      debugError('Error in observState:', error);
     }
   }
 
