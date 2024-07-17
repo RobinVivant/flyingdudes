@@ -6,6 +6,7 @@ import Home from './pages/Home';
 import Play from './pages/Play';
 import About from './pages/About';
 import Leroux from './pages/Leroux';
+import './App.css';
 
 function App() {
   return (
