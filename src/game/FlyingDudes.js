@@ -36,7 +36,7 @@ class FlyingDudes extends Phaser.Scene {
     this.load.image('target', '/assets/sprites/quille.png');
     this.load.image('analog', '/assets/sprites/fusia.png');
     this.load.image('circle', '/assets/sprites/circle.png');
-    this.load.spritesheet('btn_reset', '/assets/reset-button.png', { frameWidth: 125, frameHeight: 52 });
+    this.load.spritesheet('btn_reset', '/assets/sprites/reset-button.png', { frameWidth: 125, frameHeight: 52 });
   }
 
   create() {

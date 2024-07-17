@@ -66,3 +66,61 @@ This project is licensed under the ISC License. See the `package.json` file for 
 
 - Jean-Paul Stromboni for course supervision
 - The Meteor and Phaser communities for their excellent frameworks and documentation
+# Flying Dudes
+
+A React-based game project for the Computer Control course at SI4 2014.
+
+## Prerequisites
+
+- Node.js (v14 or later)
+- npm (v6 or later)
+
+## Installation
+
+1. Clone the repository:
+   ```
+   git clone https://github.com/your-username/flying-dudes.git
+   cd flying-dudes
+   ```
+
+2. Install dependencies:
+   ```
+   npm install
+   ```
+
+## Running the Development Server
+
+To start the development server:
+
+```
+npm start
+```
+
+The game will be available at `http://localhost:3000`.
+
+## Building for Production
+
+To create a production build:
+
+```
+npm run build
+```
+
+This will create a `build` directory with the production-ready files.
+
+## Project Structure
+
+- `src/`: Source code
+  - `components/`: React components
+  - `pages/`: Page components
+  - `game/`: Game logic
+  - `assets/`: Game assets (images, sounds, etc.)
+- `public/`: Public files
+
+## Contributing
+
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
