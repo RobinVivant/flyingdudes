@@ -13,11 +13,16 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.11.2",
-    "phaser": "^3.60.0"
+    "phaser": "^3.60.0",
+    "mathjs": "^11.8.0",
+    "p2": "^0.7.1"
   },
   "devDependencies": {
-    "react-scripts": "5.0.0",
-    "@babel/plugin-proposal-private-property-in-object": "^7.21.0"
+    "react-scripts": "5.0.1",
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.0",
+    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/react": "^14.0.0",
+    "@testing-library/user-event": "^14.4.3"
   },
   "author": "",
   "license": "ISC",
