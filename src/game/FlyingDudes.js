@@ -1,5 +1,4 @@
 import Phaser from 'phaser';
-import p2 from 'p2';
 import * as math from 'mathjs';
 
 class FlyingDudes extends Phaser.Scene {
@@ -23,12 +22,7 @@ class FlyingDudes extends Phaser.Scene {
     this.mvide = 50;
     this.m = this.mvide + this.mfuel / 1000;
     this.h = 50;
-    this.world = new p2.World({
-      gravity: [0, 9.82]
-    });
   }
-
-  // Helper functions for vector and matrix operations are now handled by mathjs
 
   preload() {
     this.load.image('background', '/assets/sprites/background.png');
@@ -42,33 +36,16 @@ class FlyingDudes extends Phaser.Scene {
   create() {
     this.add.tileSprite(0, 0, this.game.config.width, this.game.config.height, 'background').setOrigin(0);
     
-    this.player = this.matter.add.sprite(100, this.game.config.height / 2, 'player');
+    this.player = this.physics.add.sprite(100, this.game.config.height / 2, 'player');
     this.player.setCollideWorldBounds(true);
     this.player.setScale(0.5);
 
-    // Create a p2 body for the player
-    const playerShape = new p2.Circle({ radius: this.player.width / 4 });
-    this.playerBody = new p2.Body({
-      mass: this.m,
-      position: [this.player.x, this.player.y],
-      velocity: [0, 0]
-    });
-    this.playerBody.addShape(playerShape);
-    this.world.addBody(this.playerBody);
-
     this.cursors = this.input.keyboard.createCursorKeys();
 
-    this.targets = this.matter.add.group();
+    this.targets = this.physics.add.group();
     this.createTargets();
 
-    this.matter.world.on('collisionstart', (event, bodyA, bodyB) => {
-      if (bodyA.gameObject === this.player || bodyB.gameObject === this.player) {
-        const target = bodyA.gameObject === this.player ? bodyB.gameObject : bodyA.gameObject;
-        if (this.targets.contains(target)) {
-          this.collectTarget(this.player, target);
-        }
-      }
-    });
+    this.physics.add.overlap(this.player, this.targets, this.collectTarget, null, this);
 
     this.scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#000' });
     this.fuelText = this.add.text(16, 50, 'Fuel: 1000', { fontSize: '32px', fill: '#000' });
@@ -98,51 +75,45 @@ class FlyingDudes extends Phaser.Scene {
   }
 
   update() {
-    this.world.step(this.Te);
     this.handleInput();
     this.updateFuelDisplay();
     this.updateAutoMode();
     this.observState();
-    this.player.setPosition(this.playerBody.position[0], this.playerBody.position[1]);
-    this.player.setRotation(this.playerBody.angle);
   }
 
   handleInput() {
     if (!this.dataBoucleOuverte.isRunning) {
-      let thrust = { x: 0, y: 0 };
+      this.player.setVelocity(0);
 
       if (this.cursors.left.isDown) {
-        thrust.x = -this.maxThrust;
+        this.player.setVelocityX(-this.maxThrust * 10);
       } else if (this.cursors.right.isDown) {
-        thrust.x = this.maxThrust;
+        this.player.setVelocityX(this.maxThrust * 10);
       }
 
       if (this.cursors.up.isDown) {
-        thrust.y = -this.maxThrust;
+        this.player.setVelocityY(-this.maxThrust * 10);
       } else if (this.cursors.down.isDown) {
-        thrust.y = this.maxThrust;
+        this.player.setVelocityY(this.maxThrust * 10);
       }
 
-      this.applyThrust(thrust);
+      this.applyThrust(this.player.body.velocity);
     } else {
       this.applyBoucleOuverteThrust();
     }
   }
 
-  applyThrust(thrust) {
+  applyThrust(velocity) {
     if (this.mfuel > 0) {
-      const fuelConsumption = Math.sqrt(thrust.x * thrust.x + thrust.y * thrust.y) * this.Te;
+      const fuelConsumption = Math.sqrt(velocity.x * velocity.x + velocity.y * velocity.y) * this.Te / 10;
       this.mfuel = Math.max(0, this.mfuel - fuelConsumption);
       this.cConso += fuelConsumption;
 
-      const Un = math.matrix([thrust.x, thrust.y + this.gravity]);
+      const Un = math.matrix([velocity.x / 10, velocity.y / 10 + this.gravity]);
       const adMultiplyDudeState = math.multiply(this.Ad, this.dudeState);
       const bdMultiplyUn = math.multiply(this.Bd, Un);
       const scaledBdMultiplyUn = math.multiply(bdMultiplyUn, this.erg / this.m);
       this.dudeState = math.add(adMultiplyDudeState, scaledBdMultiplyUn);
-
-      // Apply force to the p2 body
-      this.playerBody.applyForce([thrust.x, thrust.y]);
     }
   }
 
@@ -171,6 +142,7 @@ class FlyingDudes extends Phaser.Scene {
       if (index % 2 === 0) {
         const target = this.targets.create(coord, this.TargetsCoordinates[index + 1], 'target');
         target.setScale(0.13);
+        target.body.setAllowGravity(false);
       }
     });
   }
