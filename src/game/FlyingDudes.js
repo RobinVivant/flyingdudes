@@ -288,16 +288,99 @@ class FlyingDudes extends Phaser.Scene {
   }
 
   matrixRank(matrix) {
-    // This is a simplified rank calculation and may not work for all cases
-    return matrix.filter(row => row.some(val => val !== 0)).length;
+    const epsilon = 1e-10; // Threshold for considering a value as zero
+    let rank = 0;
+    const rows = matrix.length;
+    const cols = matrix[0].length;
+    const rowEchelon = this.toRowEchelonForm(matrix);
+
+    for (let i = 0; i < rows; i++) {
+      for (let j = 0; j < cols; j++) {
+        if (Math.abs(rowEchelon[i][j]) > epsilon) {
+          rank++;
+          break;
+        }
+      }
+    }
+
+    return rank;
+  }
+
+  toRowEchelonForm(matrix) {
+    const rows = matrix.length;
+    const cols = matrix[0].length;
+    const result = matrix.map(row => [...row]);
+
+    let lead = 0;
+    for (let r = 0; r < rows; r++) {
+      if (lead >= cols) return result;
+      let i = r;
+      while (result[i][lead] === 0) {
+        i++;
+        if (i === rows) {
+          i = r;
+          lead++;
+          if (cols === lead) return result;
+        }
+      }
+      [result[i], result[r]] = [result[r], result[i]];
+      const lv = result[r][lead];
+      result[r] = result[r].map(x => x / lv);
+      for (let i = 0; i < rows; i++) {
+        if (i !== r) {
+          const lv = result[i][lead];
+          result[i] = result[i].map((x, j) => x - lv * result[r][j]);
+        }
+      }
+      lead++;
+    }
+    return result;
   }
 
   inverseMatrix(matrix) {
-    // This is a placeholder. Implementing a proper matrix inverse is complex
-    // and beyond the scope of this quick fix. You may need to implement
-    // a proper matrix inverse algorithm here.
-    console.warn('Matrix inverse not properly implemented');
-    return matrix;
+    const n = matrix.length;
+
+    // Create an augmented matrix [A | I]
+    const augmented = matrix.map((row, i) => 
+      [...row, ...Array(n).fill(0).map((_, j) => i === j ? 1 : 0)]
+    );
+
+    // Convert to reduced row echelon form
+    const rref = this.toReducedRowEchelonForm(augmented);
+
+    // Extract the right half of the matrix, which is now A^-1
+    return rref.map(row => row.slice(n));
+  }
+
+  toReducedRowEchelonForm(matrix) {
+    const rows = matrix.length;
+    const cols = matrix[0].length;
+    const result = matrix.map(row => [...row]);
+
+    let lead = 0;
+    for (let r = 0; r < rows; r++) {
+      if (lead >= cols) return result;
+      let i = r;
+      while (result[i][lead] === 0) {
+        i++;
+        if (i === rows) {
+          i = r;
+          lead++;
+          if (cols === lead) return result;
+        }
+      }
+      [result[i], result[r]] = [result[r], result[i]];
+      const lv = result[r][lead];
+      result[r] = result[r].map(x => x / lv);
+      for (let i = 0; i < rows; i++) {
+        if (i !== r) {
+          const lv = result[i][lead];
+          result[i] = result[i].map((x, j) => x - lv * result[r][j]);
+        }
+      }
+      lead++;
+    }
+    return result;
   }
 }
 
