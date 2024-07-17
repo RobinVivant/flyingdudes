@@ -3,19 +3,17 @@ import { NavLink } from 'react-router-dom';
 
 function Header() {
   return (
-    <div className="masthead clearfix">
+    <header className="masthead">
       <div className="inner">
-        <h3 className="masthead-brand"></h3>
-        <nav>
-          <ul className="nav masthead-nav">
-            <li><NavLink to="/">Accueil</NavLink></li>
-            <li><NavLink to="/play">Jouer</NavLink></li>
-            <li><NavLink to="/about">A propos</NavLink></li>
-            <li><NavLink to="/leroux">Leroux</NavLink></li>
-          </ul>
+        <h1 className="masthead-brand">Flying Dudes</h1>
+        <nav className="nav-container">
+          <NavLink to="/" className="nav-link">Home</NavLink>
+          <NavLink to="/play" className="nav-link">Play</NavLink>
+          <NavLink to="/about" className="nav-link">About</NavLink>
+          <NavLink to="/leroux" className="nav-link">Leroux</NavLink>
         </nav>
       </div>
-    </div>
+    </header>
   );
 }
 

@@ -228,7 +228,7 @@ class FlyingDudes extends Phaser.Scene {
       G = math.concat(G, math.multiply(tmpAd, this.Bd));
     }
 
-    if (math.size(G)[0] < math.size(this.Ad)[0]) {
+    if (math.size(G)[0] < math.size(this.Ad)[0]) {sd
       console.log("Erreur : Pas de solutions");
     } else {
       const y = math.subtract(Xh, math.multiply(math.pow(this.Ad, this.h), math.matrix(posDude)));
