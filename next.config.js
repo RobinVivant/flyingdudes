@@ -1,29 +1,36 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  webpack: (config) => {
-    config.module.rules.push({
-      test: /\.md$/,
-      use: 'raw-loader',
-    })
-    return config
-  },
-  // Ensure CSS modules work correctly
-  cssModules: true,
-  // Configure for static export
-  output: 'export',
-  // Configure image loader for static export
-  images: {
-    loader: 'custom',
-    loaderFile: './image-loader.js',
-  },
-  // Ensure trailing slashes for better static hosting compatibility
-  trailingSlash: true,
-  // Disable server-based features
-  experimental: {
-    serverComponents: false,
-    serverActions: false,
-  },
+  swcMinify: true,
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=63072000; includeSubDomains; preload'
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff'
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY'
+          },
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block'
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin'
+          }
+        ]
+      }
+    ]
+  }
 }
 
-export default nextConfig
+module.exports = nextConfig
