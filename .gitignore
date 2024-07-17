@@ -1,3 +1,5 @@
 .idea
 .meteor
 *.iml
+.aider*
+/.idea/
