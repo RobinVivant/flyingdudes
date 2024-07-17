@@ -168,27 +168,33 @@ body {
 
 .game-info {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: space-around;
+  flex-direction: column;
+  align-items: center;
   margin-bottom: 1rem;
   font-size: 1rem;
 }
 
 .game-info p {
-  margin: 0.5rem;
+  margin: 0.5rem 0;
   padding: 0.5rem 1rem;
   background-color: rgba(0, 0, 0, 0.7);
   color: #fff;
   border-radius: 25px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 300px;
+  text-align: center;
 }
 
 .game-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   margin-bottom: 1rem;
 }
 
 .game-controls button {
-  margin: 0.5rem;
+  margin: 0.5rem 0;
   padding: 0.5rem 1rem;
   font-size: 1rem;
   background-color: #008CBA;
@@ -198,6 +204,8 @@ body {
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 300px;
 }
 
 .game-controls button:hover {
@@ -240,19 +248,6 @@ body {
 }
 
 @media (max-width: 768px) {
-  .game-info {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .game-info p {
-    margin: 0.25rem 0;
-  }
-
-  .game-controls button {
-    margin: 0.25rem;
-  }
-
   .game-instructions {
     padding: 1rem;
   }
