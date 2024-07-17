@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "pages:build": "npx @cloudflare/next-on-pages",
+    "pages:deploy": "npm run pages:build && wrangler pages deploy .vercel/output/static",
+    "pages:watch": "npx @cloudflare/next-on-pages --watch",
+    "pages:dev": "npx wrangler pages dev .vercel/output/static --compatibility-date=2023-07-10 --compatibility-flag=nodejs_compat"
   },
   "dependencies": {
     "next": "^13.4.4",
@@ -16,10 +20,13 @@
     "mathjs": "^11.8.0"
   },
   "devDependencies": {
+    "@cloudflare/next-on-pages": "^1.5.0",
     "@types/node": "^20.2.5",
     "@types/react": "^18.2.7",
     "typescript": "^5.0.4",
-    "raw-loader": "^4.0.2"
+    "raw-loader": "^4.0.2",
+    "vercel": "^31.0.1",
+    "wrangler": "^3.1.1"
   },
   "author": "",
   "license": "ISC"

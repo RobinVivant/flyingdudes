@@ -10,6 +10,8 @@ const nextConfig = {
   },
   // Add this to ensure CSS modules work correctly
   cssModules: true,
+  // Add this for Cloudflare Pages compatibility
+  output: 'standalone',
 }
 
 module.exports = nextConfig
