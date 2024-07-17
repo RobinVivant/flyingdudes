@@ -1,4 +1,6 @@
 import Phaser from 'phaser';
+import p2 from 'p2';
+import * as math from 'mathjs';
 
 class FlyingDudes extends Phaser.Scene {
   constructor() {
@@ -21,42 +23,12 @@ class FlyingDudes extends Phaser.Scene {
     this.mvide = 50;
     this.m = this.mvide + this.mfuel / 1000;
     this.h = 50;
+    this.world = new p2.World({
+      gravity: [0, 9.82]
+    });
   }
 
-  // Helper functions for vector and matrix operations
-  createVector(elements) {
-    return elements;
-  }
-
-  createMatrix(rows) {
-    return rows;
-  }
-
-  multiplyMatrixVector(matrix, vector) {
-    return matrix.map(row => 
-      row.reduce((sum, value, index) => sum + value * vector[index], 0)
-    );
-  }
-
-  multiplyMatrices(matrix1, matrix2) {
-    return matrix1.map(row => 
-      matrix2[0].map((_, colIndex) => 
-        row.reduce((sum, cell, rowIndex) => sum + cell * matrix2[rowIndex][colIndex], 0)
-      )
-    );
-  }
-
-  addVectors(vector1, vector2) {
-    return vector1.map((value, index) => value + vector2[index]);
-  }
-
-  subtractVectors(vector1, vector2) {
-    return vector1.map((value, index) => value - vector2[index]);
-  }
-
-  multiplyVectorByScalar(vector, scalar) {
-    return vector.map(value => value * scalar);
-  }
+  // Helper functions for vector and matrix operations are now handled by mathjs
 
   preload() {
     this.load.image('background', '/assets/sprites/background.png');
@@ -70,30 +42,47 @@ class FlyingDudes extends Phaser.Scene {
   create() {
     this.add.tileSprite(0, 0, this.game.config.width, this.game.config.height, 'background').setOrigin(0);
     
-    this.player = this.physics.add.sprite(100, this.game.config.height / 2, 'player');
+    this.player = this.matter.add.sprite(100, this.game.config.height / 2, 'player');
     this.player.setCollideWorldBounds(true);
     this.player.setScale(0.5);
 
+    // Create a p2 body for the player
+    const playerShape = new p2.Circle({ radius: this.player.width / 4 });
+    this.playerBody = new p2.Body({
+      mass: this.m,
+      position: [this.player.x, this.player.y],
+      velocity: [0, 0]
+    });
+    this.playerBody.addShape(playerShape);
+    this.world.addBody(this.playerBody);
+
     this.cursors = this.input.keyboard.createCursorKeys();
 
-    this.targets = this.physics.add.group();
+    this.targets = this.matter.add.group();
     this.createTargets();
 
-    this.physics.add.overlap(this.player, this.targets, this.collectTarget, null, this);
+    this.matter.world.on('collisionstart', (event, bodyA, bodyB) => {
+      if (bodyA.gameObject === this.player || bodyB.gameObject === this.player) {
+        const target = bodyA.gameObject === this.player ? bodyB.gameObject : bodyA.gameObject;
+        if (this.targets.contains(target)) {
+          this.collectTarget(this.player, target);
+        }
+      }
+    });
 
     this.scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#000' });
     this.fuelText = this.add.text(16, 50, 'Fuel: 1000', { fontSize: '32px', fill: '#000' });
 
-    this.dudeState = this.createVector([this.player.x, 0, -this.player.y, 0]);
+    this.dudeState = math.matrix([this.player.x, 0, -this.player.y, 0]);
 
-    this.Ad = this.createMatrix([
+    this.Ad = math.matrix([
       [1, this.Te, 0, 0],
       [0, 1, 0, 0],
       [0, 0, 1, this.Te],
       [0, 0, 0, 1]
     ]);
 
-    this.Bd = this.createMatrix([
+    this.Bd = math.matrix([
       [0.5 * this.Te * this.Te, 0],
       [this.Te, 0],
       [0, 0.5 * this.Te * this.Te],
@@ -109,10 +98,13 @@ class FlyingDudes extends Phaser.Scene {
   }
 
   update() {
+    this.world.step(this.Te);
     this.handleInput();
     this.updateFuelDisplay();
     this.updateAutoMode();
     this.observState();
+    this.player.setPosition(this.playerBody.position[0], this.playerBody.position[1]);
+    this.player.setRotation(this.playerBody.angle);
   }
 
   handleInput() {
@@ -143,11 +135,14 @@ class FlyingDudes extends Phaser.Scene {
       this.mfuel = Math.max(0, this.mfuel - fuelConsumption);
       this.cConso += fuelConsumption;
 
-      const Un = this.createVector([thrust.x, thrust.y + this.gravity]);
-      const adMultiplyDudeState = this.multiplyMatrixVector(this.Ad, this.dudeState);
-      const bdMultiplyUn = this.multiplyMatrixVector(this.Bd, Un);
-      const scaledBdMultiplyUn = this.multiplyVectorByScalar(bdMultiplyUn, this.erg / this.m);
-      this.dudeState = this.addVectors(adMultiplyDudeState, scaledBdMultiplyUn);
+      const Un = math.matrix([thrust.x, thrust.y + this.gravity]);
+      const adMultiplyDudeState = math.multiply(this.Ad, this.dudeState);
+      const bdMultiplyUn = math.multiply(this.Bd, Un);
+      const scaledBdMultiplyUn = math.multiply(bdMultiplyUn, this.erg / this.m);
+      this.dudeState = math.add(adMultiplyDudeState, scaledBdMultiplyUn);
+
+      // Apply force to the p2 body
+      this.playerBody.applyForce([thrust.x, thrust.y]);
     }
   }
 
@@ -251,136 +246,24 @@ class FlyingDudes extends Phaser.Scene {
   BoucleOuverte(posDude, goalPos) {
     this.dataBoucleOuverte.counter = 0;
 
-    const Xh = this.createVector([goalPos[0], 0, goalPos[1], 0]);
+    const Xh = math.matrix([goalPos[0], 0, goalPos[1], 0]);
 
     // Calcul de la matrice de gouvernabilité G
     let G = this.Bd;
     for (let n = 1; n < this.h; n++) {
-      const tmpAd = this.power(this.Ad, n);
-      G = this.augmentMatrix(this.multiplyMatrices(tmpAd, this.Bd), G);
+      const tmpAd = math.pow(this.Ad, n);
+      G = math.concat(math.multiply(tmpAd, this.Bd), G);
     }
 
-    if (this.matrixRank(G) < this.Ad.length) {
+    if (math.rank(G) < this.Ad.size()[0]) {
       console.log("Erreur : Pas de solutions");
     } else {
-      const y = this.subtractVectors(Xh, this.multiplyMatrixVector(this.power(this.Ad, this.h), posDude));
-      const Gt = this.transposeMatrix(G);
-      const GGtInverse = this.inverseMatrix(this.multiplyMatrices(G, Gt));
-      this.dataBoucleOuverte.uCom = this.multiplyMatrices(this.multiplyMatrices(Gt, GGtInverse), [y]);
+      const y = math.subtract(Xh, math.multiply(math.pow(this.Ad, this.h), posDude));
+      const Gt = math.transpose(G);
+      const GGtInverse = math.inv(math.multiply(G, Gt));
+      this.dataBoucleOuverte.uCom = math.multiply(math.multiply(Gt, GGtInverse), y);
       this.dataBoucleOuverte.isRunning = true;
     }
-  }
-
-  power(matrix, pow) {
-    let res = matrix;
-    for (let i = 1; i < pow; i++) {
-      res = this.multiplyMatrices(res, matrix);
-    }
-    return res;
-  }
-
-  augmentMatrix(matrix1, matrix2) {
-    return matrix1.map((row, i) => [...row, ...matrix2[i]]);
-  }
-
-  transposeMatrix(matrix) {
-    return matrix[0].map((_, colIndex) => matrix.map(row => row[colIndex]));
-  }
-
-  matrixRank(matrix) {
-    const epsilon = 1e-10; // Threshold for considering a value as zero
-    let rank = 0;
-    const rows = matrix.length;
-    const cols = matrix[0].length;
-    const rowEchelon = this.toRowEchelonForm(matrix);
-
-    for (let i = 0; i < rows; i++) {
-      for (let j = 0; j < cols; j++) {
-        if (Math.abs(rowEchelon[i][j]) > epsilon) {
-          rank++;
-          break;
-        }
-      }
-    }
-
-    return rank;
-  }
-
-  toRowEchelonForm(matrix) {
-    const rows = matrix.length;
-    const cols = matrix[0].length;
-    const result = matrix.map(row => [...row]);
-
-    let lead = 0;
-    for (let r = 0; r < rows; r++) {
-      if (lead >= cols) return result;
-      let i = r;
-      while (result[i][lead] === 0) {
-        i++;
-        if (i === rows) {
-          i = r;
-          lead++;
-          if (cols === lead) return result;
-        }
-      }
-      [result[i], result[r]] = [result[r], result[i]];
-      const lv = result[r][lead];
-      result[r] = result[r].map(x => x / lv);
-      for (let i = 0; i < rows; i++) {
-        if (i !== r) {
-          const lv = result[i][lead];
-          result[i] = result[i].map((x, j) => x - lv * result[r][j]);
-        }
-      }
-      lead++;
-    }
-    return result;
-  }
-
-  inverseMatrix(matrix) {
-    const n = matrix.length;
-
-    // Create an augmented matrix [A | I]
-    const augmented = matrix.map((row, i) => 
-      [...row, ...Array(n).fill(0).map((_, j) => i === j ? 1 : 0)]
-    );
-
-    // Convert to reduced row echelon form
-    const rref = this.toReducedRowEchelonForm(augmented);
-
-    // Extract the right half of the matrix, which is now A^-1
-    return rref.map(row => row.slice(n));
-  }
-
-  toReducedRowEchelonForm(matrix) {
-    const rows = matrix.length;
-    const cols = matrix[0].length;
-    const result = matrix.map(row => [...row]);
-
-    let lead = 0;
-    for (let r = 0; r < rows; r++) {
-      if (lead >= cols) return result;
-      let i = r;
-      while (result[i][lead] === 0) {
-        i++;
-        if (i === rows) {
-          i = r;
-          lead++;
-          if (cols === lead) return result;
-        }
-      }
-      [result[i], result[r]] = [result[r], result[i]];
-      const lv = result[r][lead];
-      result[r] = result[r].map(x => x / lv);
-      for (let i = 0; i < rows; i++) {
-        if (i !== r) {
-          const lv = result[i][lead];
-          result[i] = result[i].map((x, j) => x - lv * result[r][j]);
-        }
-      }
-      lead++;
-    }
-    return result;
   }
 }
 
