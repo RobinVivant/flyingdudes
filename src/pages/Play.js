@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import dynamic from 'next/dynamic';
 
-const Game = dynamic(() => import('../components/Game'), { ssr: false });
+const Game = dynamic(() => import('../components/Game'), { ssr: false, loading: () => <p>Loading...</p> });
 
 function Play() {
   const [gameState, setGameState] = useState({
