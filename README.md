@@ -25,6 +25,10 @@ Feeling nostalgic and want to run this bad boy locally? Here's how:
 3. Hit it with `npm run dev`
 4. Travel back in time to http://localhost:3000
 
+## The Authentic Experience
+
+In the spirit of true nostalgia and authenticity, we've kept the game in its original, slightly broken state. Yes, that means some features might not work perfectly, and there might be a bug or two (or ten). But hey, that's part of the charm, right? It's like playing an old NES game - blowing on the cartridge is half the fun!
+
 ## Want to Contribute?
 
 Did this blast from the past inspire you? Got some ideas to make Flying Dudes even cooler? Pull requests are welcome! Just remember, with great power comes great responsibility (and potential for adding more flying dudes).
