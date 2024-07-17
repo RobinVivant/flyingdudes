@@ -1,2 +1,0 @@
-
-Session.set('activePage', 'home');
