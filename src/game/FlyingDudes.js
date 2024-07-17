@@ -25,17 +25,20 @@ class FlyingDudes extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image('background', '/assets/sprites/background.png');
-    this.load.image('player', '/assets/sprites/the_dude.png');
-    this.load.image('target', '/assets/sprites/quille.png');
+    this.load.image('background', '/assets/sprites/background.png', { premultiplyAlpha: false });
+    this.load.image('player', '/assets/sprites/the_dude.png', { premultiplyAlpha: false });
+    this.load.image('target', '/assets/sprites/quille.png', { premultiplyAlpha: false });
   }
 
   create() {
-    this.add.image(this.game.config.width / 2, this.game.config.height / 2, 'background').setScale(2);
+    this.add.image(this.game.config.width / 2, this.game.config.height / 2, 'background')
+      .setScale(2)
+      .setDepth(0);
     
     this.player = this.physics.add.sprite(100, this.game.config.height / 2, 'player');
     this.player.setCollideWorldBounds(true);
     this.player.setScale(0.5);
+    this.player.setDepth(1);
 
     this.cursors = this.input.keyboard.createCursorKeys();
 
