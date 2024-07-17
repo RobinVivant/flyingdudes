@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "pages:build": "next build && next export",
+    "pages:build": "next build",
     "pages:deploy": "npm run pages:build && wrangler pages deploy out",
     "pages:watch": "npx @cloudflare/next-on-pages --watch",
     "pages:dev": "npx wrangler pages dev out --compatibility-date=2023-07-10 --compatibility-flag=nodejs_compat"
