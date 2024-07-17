@@ -7,6 +7,8 @@ function Play() {
   const [gameInstance, setGameInstance] = useState(null);
   const [score, setScore] = useState(0);
   const [fuel, setFuel] = useState(1000);
+  const [targetsReached, setTargetsReached] = useState(0);
+  const [fuelConsumed, setFuelConsumed] = useState(0);
 
   useEffect(() => {
     const config = {
@@ -31,7 +33,9 @@ function Play() {
       const scene = game.scene.getScene('FlyingDudes');
       if (scene) {
         setScore(scene.score);
-        setFuel(Math.round(scene.fuel));
+        setFuel(Math.round(scene.mfuel));
+        setTargetsReached(scene.TargetsReached);
+        setFuelConsumed(scene.cConso);
       }
     };
 
@@ -47,7 +51,16 @@ function Play() {
     if (gameInstance) {
       const scene = gameInstance.scene.getScene('FlyingDudes');
       if (scene) {
-        scene.scene.restart();
+        scene.actionOnReset();
+      }
+    }
+  };
+
+  const handleAutoMode = () => {
+    if (gameInstance) {
+      const scene = gameInstance.scene.getScene('FlyingDudes');
+      if (scene) {
+        scene.actionOnAutoMode();
       }
     }
   };
@@ -58,7 +71,10 @@ function Play() {
       <div className="game-info">
         <p>Score: {score}</p>
         <p>Fuel: {fuel}</p>
+        <p>Targets Reached: {targetsReached}/6</p>
+        <p>Fuel Consumed: {fuelConsumed.toFixed(2)}</p>
         <button onClick={handleReset}>Reset Game</button>
+        <button onClick={handleAutoMode}>Auto Mode</button>
       </div>
       <div ref={gameRef} id="game-container"></div>
       <div className="game-instructions">
@@ -67,6 +83,8 @@ function Play() {
           <li>Use arrow keys to control the dude</li>
           <li>Collect targets to increase your score</li>
           <li>Watch your fuel consumption!</li>
+          <li>Press 'R' to reset the game</li>
+          <li>Press 'A' to activate auto mode</li>
         </ul>
       </div>
     </div>
