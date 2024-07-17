@@ -145,8 +145,8 @@ class FlyingDudes extends Phaser.Scene {
   }
 
   updateState() {
-    this.player.setPosition(this.dudeState.e(1), -this.dudeState.e(3));
-    this.player.setVelocity(this.dudeState.e(2), -this.dudeState.e(4));
+    this.player.setPosition(this.dudeState.get([0]), -this.dudeState.get([2]));
+    this.player.setVelocity(this.dudeState.get([1]), -this.dudeState.get([3]));
   }
 
   createTargets() {
@@ -246,7 +246,7 @@ class FlyingDudes extends Phaser.Scene {
     if (math.size(G)[0] < math.size(this.Ad)[0]) {
       console.log("Erreur : Pas de solutions");
     } else {
-      const y = math.subtract(Xh, math.multiply(math.pow(this.Ad, this.h), posDude));
+      const y = math.subtract(Xh, math.multiply(math.pow(this.Ad, this.h), math.matrix(posDude)));
       const Gt = math.transpose(G);
       const GGtInverse = math.inv(math.multiply(G, Gt));
       this.dataBoucleOuverte.uCom = math.multiply(math.multiply(Gt, GGtInverse), y);
