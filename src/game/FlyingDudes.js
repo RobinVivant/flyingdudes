@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import p2 from 'p2';
-import * as math from 'mathjs';
+import { matrix, multiply, add, subtract, pow, transpose, inv, concat } from 'mathjs';
 
 class FlyingDudes extends Phaser.Scene {
   constructor() {
@@ -73,16 +73,16 @@ class FlyingDudes extends Phaser.Scene {
     this.scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#000' });
     this.fuelText = this.add.text(16, 50, 'Fuel: 1000', { fontSize: '32px', fill: '#000' });
 
-    this.dudeState = math.matrix([this.player.x, 0, -this.player.y, 0]);
+    this.dudeState = matrix([this.player.x, 0, -this.player.y, 0]);
 
-    this.Ad = math.matrix([
+    this.Ad = matrix([
       [1, this.Te, 0, 0],
       [0, 1, 0, 0],
       [0, 0, 1, this.Te],
       [0, 0, 0, 1]
     ]);
 
-    this.Bd = math.matrix([
+    this.Bd = matrix([
       [0.5 * this.Te * this.Te, 0],
       [this.Te, 0],
       [0, 0.5 * this.Te * this.Te],
@@ -135,11 +135,11 @@ class FlyingDudes extends Phaser.Scene {
       this.mfuel = Math.max(0, this.mfuel - fuelConsumption);
       this.cConso += fuelConsumption;
 
-      const Un = math.matrix([thrust.x, thrust.y + this.gravity]);
-      const adMultiplyDudeState = math.multiply(this.Ad, this.dudeState);
-      const bdMultiplyUn = math.multiply(this.Bd, Un);
-      const scaledBdMultiplyUn = math.multiply(bdMultiplyUn, this.erg / this.m);
-      this.dudeState = math.add(adMultiplyDudeState, scaledBdMultiplyUn);
+      const Un = matrix([thrust.x, thrust.y + this.gravity]);
+      const adMultiplyDudeState = multiply(this.Ad, this.dudeState);
+      const bdMultiplyUn = multiply(this.Bd, Un);
+      const scaledBdMultiplyUn = multiply(bdMultiplyUn, this.erg / this.m);
+      this.dudeState = add(adMultiplyDudeState, scaledBdMultiplyUn);
 
       // Apply force to the p2 body
       this.playerBody.applyForce([thrust.x, thrust.y]);
@@ -246,22 +246,22 @@ class FlyingDudes extends Phaser.Scene {
   BoucleOuverte(posDude, goalPos) {
     this.dataBoucleOuverte.counter = 0;
 
-    const Xh = math.matrix([goalPos[0], 0, goalPos[1], 0]);
+    const Xh = matrix([goalPos[0], 0, goalPos[1], 0]);
 
     // Calcul de la matrice de gouvernabilité G
     let G = this.Bd;
     for (let n = 1; n < this.h; n++) {
-      const tmpAd = math.pow(this.Ad, n);
-      G = math.concat(math.multiply(tmpAd, this.Bd), G);
+      const tmpAd = pow(this.Ad, n);
+      G = concat(multiply(tmpAd, this.Bd), G);
     }
 
-    if (math.rank(G) < this.Ad.size()[0]) {
+    if (G.size()[0] < this.Ad.size()[0]) {
       console.log("Erreur : Pas de solutions");
     } else {
-      const y = math.subtract(Xh, math.multiply(math.pow(this.Ad, this.h), posDude));
-      const Gt = math.transpose(G);
-      const GGtInverse = math.inv(math.multiply(G, Gt));
-      this.dataBoucleOuverte.uCom = math.multiply(math.multiply(Gt, GGtInverse), y);
+      const y = subtract(Xh, multiply(pow(this.Ad, this.h), posDude));
+      const Gt = transpose(G);
+      const GGtInverse = inv(multiply(G, Gt));
+      this.dataBoucleOuverte.uCom = multiply(multiply(Gt, GGtInverse), y);
       this.dataBoucleOuverte.isRunning = true;
     }
   }
