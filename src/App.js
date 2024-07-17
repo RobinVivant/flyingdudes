@@ -14,7 +14,9 @@ function App() {
       backgroundImage: `url(${process.env.PUBLIC_URL}/assets/sprites/background.png)`,
       backgroundSize: 'cover',
       backgroundRepeat: 'no-repeat',
-      backgroundAttachment: 'fixed'
+      backgroundPosition: 'center top',
+      backgroundAttachment: 'fixed',
+      minHeight: '100vh'
     }}>
       <div className="site-wrapper-inner">
         <div className="cover-container">
