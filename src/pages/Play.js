@@ -94,26 +94,26 @@ function Play() {
 
   return (
     <div className="play-container">
-      <h2>The Flying Dude's Adventure</h2>
+      <h2>L'Aventure du Dude Volant</h2>
       <div className="game-info">
-        <p>Score: {gameState.score}</p>
-        <p>Fuel: {gameState.fuel}</p>
-        <p>Targets: {gameState.targetsReached}/6</p>
-        <p>Fuel Used: {gameState.fuelConsumed.toFixed(2)}</p>
+        <p>Score : {gameState.score}</p>
+        <p>Carburant : {gameState.fuel}</p>
+        <p>Cibles : {gameState.targetsReached}/6</p>
+        <p>Carburant utilisé : {gameState.fuelConsumed.toFixed(2)}</p>
       </div>
       <div className="game-controls">
-        <button onClick={handleReset}>Reset Game</button>
-        <button onClick={handleAutoMode}>Auto Mode</button>
+        <button onClick={handleReset}>Réinitialiser le jeu</button>
+        <button onClick={handleAutoMode}>Mode Auto</button>
       </div>
       <div ref={gameRef} id="game-container"></div>
       <div className="game-instructions">
-        <h3>How to Play:</h3>
+        <h3>Comment jouer :</h3>
         <ul>
-          <li>Use arrow keys to guide The Dude through the air</li>
-          <li>Collect floating targets to increase your score</li>
-          <li>Keep an eye on your fuel - don't run out!</li>
-          <li>Press 'R' to reset the game at any time</li>
-          <li>Try 'A' to activate auto mode and watch The Dude fly solo</li>
+          <li>Utilisez les flèches du clavier pour guider Le Dude dans les airs</li>
+          <li>Collectez les cibles flottantes pour augmenter votre score</li>
+          <li>Gardez un œil sur votre carburant - ne tombez pas en panne !</li>
+          <li>Appuyez sur 'R' pour réinitialiser le jeu à tout moment</li>
+          <li>Essayez 'A' pour activer le mode auto et regardez Le Dude voler en solo</li>
         </ul>
       </div>
     </div>

@@ -3,14 +3,14 @@ import React from 'react';
 function About() {
   return (
     <div className="inner cover">
-      <h1 className="cover-heading">About Flying Dudes</h1>
+      <h1 className="cover-heading">À propos de Flying Dudes</h1>
       <p className="lead">
-        Flying Dudes is a project developed for the Computer Control course at SI4 2014, 
-        supervised by Jean-Paul Stromboni.
+        Flying Dudes est un projet développé pour le cours de Contrôle Informatique à SI4 2014, 
+        supervisé par Jean-Paul Stromboni.
       </p>
       <p>
-        This game demonstrates principles of control systems and physics simulation 
-        in an interactive and fun environment.
+        Ce jeu démontre les principes des systèmes de contrôle et de simulation physique 
+        dans un environnement interactif et amusant.
       </p>
     </div>
   );
