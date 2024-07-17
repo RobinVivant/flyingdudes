@@ -214,7 +214,7 @@ class FlyingDudes extends Phaser.Scene {
   actionOnReset() {
     this.cConso = 0;
     this.mfuel = 1000;
-    this.dudeState = Vector.create([100, 50, -300, 0]);
+    this.dudeState = math.matrix([100, 50, -300, 0]);
     this.TargetsReached = 0;
     this.score = 0;
     this.scoreText.setText('Score: ' + this.score);
@@ -226,7 +226,7 @@ class FlyingDudes extends Phaser.Scene {
     if (!this.autoMode.isLaunched) {
       this.cConso = 0;
       this.mfuel = 1000;
-      this.dudeState = Vector.create([100, 50, -300, 0]);
+      this.dudeState = math.matrix([100, 50, -300, 0]);
       this.autoMode.isLaunched = true;
     }
   }
