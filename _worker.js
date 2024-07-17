@@ -1,9 +1,8 @@
 import { createPagesFunctionHandler } from '@cloudflare/next-on-pages'
 
+// @ts-ignore
 const handler = createPagesFunctionHandler({
-  build: require('./build'),
+  build: require('./.vercel/output/functions/[[path]].func'),
 })
 
-export function onRequest(context) {
-  return handler(context)
-}
+export const onRequest = handler

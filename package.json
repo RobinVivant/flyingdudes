@@ -7,10 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "pages:build": "npx @cloudflare/next-on-pages",
-    "pages:deploy": "npm run pages:build && wrangler pages deploy .vercel/output/static",
+    "pages:build": "next build && next export",
+    "pages:deploy": "npm run pages:build && wrangler pages deploy out",
     "pages:watch": "npx @cloudflare/next-on-pages --watch",
-    "pages:dev": "npx wrangler pages dev .vercel/output/static --compatibility-date=2023-07-10 --compatibility-flag=nodejs_compat"
+    "pages:dev": "npx wrangler pages dev out --compatibility-date=2023-07-10 --compatibility-flag=nodejs_compat"
   },
   "dependencies": {
     "next": "^14.2.5",
