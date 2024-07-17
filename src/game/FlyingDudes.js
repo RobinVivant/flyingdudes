@@ -28,13 +28,10 @@ class FlyingDudes extends Phaser.Scene {
     this.load.image('background', '/assets/sprites/background.png');
     this.load.image('player', '/assets/sprites/the_dude.png');
     this.load.image('target', '/assets/sprites/quille.png');
-    this.load.image('analog', '/assets/sprites/fusia.png');
-    this.load.image('circle', '/assets/sprites/circle.png');
-    this.load.spritesheet('btn_reset', '/assets/sprites/reset-button.png', { frameWidth: 125, frameHeight: 52 });
   }
 
   create() {
-    this.add.tileSprite(0, 0, this.game.config.width, this.game.config.height, 'background').setOrigin(0);
+    this.add.image(this.game.config.width / 2, this.game.config.height / 2, 'background').setScale(2);
     
     this.player = this.physics.add.sprite(100, this.game.config.height / 2, 'player');
     this.player.setCollideWorldBounds(true);
@@ -42,7 +39,7 @@ class FlyingDudes extends Phaser.Scene {
 
     this.cursors = this.input.keyboard.createCursorKeys();
 
-    this.targets = this.physics.add.group();
+    this.targets = this.physics.add.staticGroup();
     this.createTargets();
 
     this.physics.add.overlap(this.player, this.targets, this.collectTarget, null, this);
@@ -143,7 +140,6 @@ class FlyingDudes extends Phaser.Scene {
       if (index % 2 === 0) {
         const target = this.targets.create(coord, this.TargetsCoordinates[index + 1], 'target');
         target.setScale(0.13);
-        target.body.setAllowGravity(false);
       }
     });
   }
@@ -228,7 +224,7 @@ class FlyingDudes extends Phaser.Scene {
       G = math.concat(G, math.multiply(tmpAd, this.Bd));
     }
 
-    if (math.size(G)[0] < math.size(this.Ad)[0]) {sd
+    if (math.size(G)[0] < math.size(this.Ad)[0]) {
       console.log("Erreur : Pas de solutions");
     } else {
       const y = math.subtract(Xh, math.multiply(math.pow(this.Ad, this.h), math.matrix(posDude)));
