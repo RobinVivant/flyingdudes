@@ -74,6 +74,13 @@ class FlyingDudes extends Phaser.Scene {
     this.input.keyboard.on('keydown-A', this.actionOnAutoMode, this);
 
     this.cameras.main.startFollow(this.player);
+
+    // Add instructions text
+    this.add.text(16, this.game.config.height - 120, 'How to Play:', { fontSize: '24px', fill: '#000' });
+    this.add.text(16, this.game.config.height - 90, '- Use arrow keys to guide The Dude', { fontSize: '16px', fill: '#000' });
+    this.add.text(16, this.game.config.height - 70, '- Collect floating targets', { fontSize: '16px', fill: '#000' });
+    this.add.text(16, this.game.config.height - 50, '- Press R to reset the game', { fontSize: '16px', fill: '#000' });
+    this.add.text(16, this.game.config.height - 30, '- Press A for auto mode', { fontSize: '16px', fill: '#000' });
   }
 
   update() {
@@ -98,6 +105,8 @@ class FlyingDudes extends Phaser.Scene {
 
       if (this.cursors.up.isDown) {
         this.player.setAccelerationY(-acceleration - this.gravity);
+      } else if (this.cursors.down.isDown) {
+        this.player.setAccelerationY(acceleration + this.gravity);
       } else {
         this.player.setAccelerationY(this.gravity);
       }
@@ -105,6 +114,12 @@ class FlyingDudes extends Phaser.Scene {
       this.applyThrust(this.player.body.acceleration);
     } else {
       this.applyBoucleOuverteThrust();
+    }
+
+    // Check if fuel has run out
+    if (this.mfuel <= 0) {
+      this.player.setAcceleration(0, this.gravity);
+      this.fuelText.setText('Fuel: 0 - Out of fuel!');
     }
   }
 
