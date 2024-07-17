@@ -1,13 +1,14 @@
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback, useState } from 'react';
 import Phaser from 'phaser';
 import FlyingDudes from '../game/FlyingDudes';
 
 function Game({ updateGameState }) {
   const gameRef = useRef(null);
   const gameInstanceRef = useRef(null);
+  const [isGameCreated, setIsGameCreated] = useState(false);
 
   const createGame = useCallback(() => {
-    if (gameRef.current && !gameInstanceRef.current) {
+    if (gameRef.current && !gameInstanceRef.current && !isGameCreated) {
       const width = Math.min(800, gameRef.current.clientWidth);
       const height = width * 0.75; // Maintain 4:3 aspect ratio
 
@@ -27,8 +28,9 @@ function Game({ updateGameState }) {
       };
 
       gameInstanceRef.current = new Phaser.Game(config);
+      setIsGameCreated(true);
     }
-  }, []);
+  }, [isGameCreated]);
 
   const updateGameStateFromScene = useCallback(() => {
     if (gameInstanceRef.current) {
@@ -46,27 +48,36 @@ function Game({ updateGameState }) {
 
   useEffect(() => {
     createGame();
-    const interval = setInterval(updateGameStateFromScene, 100);
+    
+    if (isGameCreated) {
+      const interval = setInterval(updateGameStateFromScene, 100);
 
-    const handleResize = () => {
-      if (gameInstanceRef.current) {
-        const width = Math.min(800, gameRef.current.clientWidth);
-        const height = width * 0.75;
-        gameInstanceRef.current.scale.resize(width, height);
-      }
-    };
+      const handleResize = () => {
+        if (gameInstanceRef.current) {
+          const width = Math.min(800, gameRef.current.clientWidth);
+          const height = width * 0.75;
+          gameInstanceRef.current.scale.resize(width, height);
+        }
+      };
 
-    window.addEventListener('resize', handleResize);
+      window.addEventListener('resize', handleResize);
 
+      return () => {
+        clearInterval(interval);
+        window.removeEventListener('resize', handleResize);
+      };
+    }
+  }, [createGame, updateGameStateFromScene, isGameCreated]);
+
+  useEffect(() => {
     return () => {
-      clearInterval(interval);
-      window.removeEventListener('resize', handleResize);
       if (gameInstanceRef.current) {
         gameInstanceRef.current.destroy(true);
         gameInstanceRef.current = null;
+        setIsGameCreated(false);
       }
     };
-  }, [createGame, updateGameStateFromScene]);
+  }, []);
 
   const handleReset = useCallback(() => {
     if (gameInstanceRef.current) {
