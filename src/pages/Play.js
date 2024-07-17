@@ -11,41 +11,62 @@ function Play() {
   const [fuelConsumed, setFuelConsumed] = useState(0);
 
   useEffect(() => {
-    const config = {
-      type: Phaser.AUTO,
-      width: 800,
-      height: 600,
-      parent: gameRef.current,
-      physics: {
-        default: 'arcade',
-        arcade: {
-          gravity: { y: 0 },
-          debug: false
+    const updateGameSize = () => {
+      if (gameRef.current) {
+        const width = Math.min(800, gameRef.current.clientWidth);
+        const height = width * 0.75; // Maintain 4:3 aspect ratio
+
+        const config = {
+          type: Phaser.AUTO,
+          width: width,
+          height: height,
+          parent: gameRef.current,
+          physics: {
+            default: 'arcade',
+            arcade: {
+              gravity: { y: 0 },
+              debug: false
+            }
+          },
+          scene: [FlyingDudes]
+        };
+
+        if (gameInstance) {
+          gameInstance.destroy(true);
         }
-      },
-      scene: [FlyingDudes]
-    };
 
-    const game = new Phaser.Game(config);
-    setGameInstance(game);
+        const game = new Phaser.Game(config);
+        setGameInstance(game);
 
-    const updateGameState = () => {
-      const scene = game.scene.getScene('FlyingDudes');
-      if (scene) {
-        setScore(scene.score);
-        setFuel(Math.round(scene.mfuel));
-        setTargetsReached(scene.TargetsReached);
-        setFuelConsumed(scene.cConso);
+        const updateGameState = () => {
+          const scene = game.scene.getScene('FlyingDudes');
+          if (scene) {
+            setScore(scene.score);
+            setFuel(Math.round(scene.mfuel));
+            setTargetsReached(scene.TargetsReached);
+            setFuelConsumed(scene.cConso);
+          }
+        };
+
+        const interval = setInterval(updateGameState, 100);
+
+        return () => {
+          clearInterval(interval);
+          game.destroy(true);
+        };
       }
     };
 
-    const interval = setInterval(updateGameState, 100);
+    updateGameSize();
+    window.addEventListener('resize', updateGameSize);
 
     return () => {
-      clearInterval(interval);
-      game.destroy(true);
+      window.removeEventListener('resize', updateGameSize);
+      if (gameInstance) {
+        gameInstance.destroy(true);
+      }
     };
-  }, []);
+  }, [gameInstance]);
 
   const handleReset = () => {
     if (gameInstance) {
