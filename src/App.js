@@ -16,8 +16,8 @@ function App() {
       backgroundRepeat: 'no-repeat',
       backgroundPosition: 'center top',
       backgroundAttachment: 'fixed',
-      height: '100vh',
-      overflow: 'hidden'
+      minHeight: '100vh',
+      overflow: 'auto'
     }}>
       <div className="site-wrapper-inner">
         <div className="cover-container">
