@@ -1,14 +1,6 @@
 import Phaser from 'phaser';
 import * as math from 'mathjs';
 
-if (!math || typeof math.matrix !== 'function') {
-  console.error('mathjs is not properly imported or does not have the expected methods', new Error().stack);
-}
-
-function debugError(message, error) {
-  console.error(`${message}\nFile: ${__filename}\nLine: ${error.lineNumber}\nStack: ${error.stack}`);
-}
-
 class FlyingDudes extends Phaser.Scene {
   constructor() {
     super('FlyingDudes');
@@ -30,7 +22,6 @@ class FlyingDudes extends Phaser.Scene {
     this.mvide = 50;
     this.m = this.mvide + this.mfuel / 1000;
     this.h = 50;
-    this.audioContext = null;
   }
 
   preload() {
@@ -81,44 +72,33 @@ class FlyingDudes extends Phaser.Scene {
     this.input.keyboard.on('keydown-A', this.actionOnAutoMode, this);
 
     this.cameras.main.startFollow(this.player);
-
-    // Initialize AudioContext after user interaction
-    this.input.on('pointerdown', () => {
-      this.initAudioContext();
-    });
-    this.input.keyboard.on('keydown', () => {
-      this.initAudioContext();
-    });
   }
 
   update() {
-    try {
-      this.handleInput();
-      this.updateFuelDisplay();
-      this.updateAutoMode();
-      this.observState();
-    } catch (error) {
-      debugError('Error in update:', error);
-    }
+    this.handleInput();
+    this.updateFuelDisplay();
+    this.updateAutoMode();
+    this.observState();
   }
 
   handleInput() {
     if (!this.dataBoucleOuverte.isRunning) {
-      this.player.setVelocity(0);
+      const velocity = { x: 0, y: 0 };
 
       if (this.cursors.left.isDown) {
-        this.player.setVelocityX(-this.maxThrust * 10);
+        velocity.x = -this.maxThrust * 10;
       } else if (this.cursors.right.isDown) {
-        this.player.setVelocityX(this.maxThrust * 10);
+        velocity.x = this.maxThrust * 10;
       }
 
       if (this.cursors.up.isDown) {
-        this.player.setVelocityY(-this.maxThrust * 10);
+        velocity.y = -this.maxThrust * 10;
       } else if (this.cursors.down.isDown) {
-        this.player.setVelocityY(this.maxThrust * 10);
+        velocity.y = this.maxThrust * 10;
       }
 
-      this.applyThrust(this.player.body.velocity);
+      this.player.setVelocity(velocity.x, velocity.y);
+      this.applyThrust(velocity);
     } else {
       this.applyBoucleOuverteThrust();
     }
@@ -141,8 +121,8 @@ class FlyingDudes extends Phaser.Scene {
   applyBoucleOuverteThrust() {
     if (this.dataBoucleOuverte.counter < this.h) {
       const thrust = {
-        x: this.dataBoucleOuverte.uCom.e(this.dataBoucleOuverte.counter * 2 + 1, 1),
-        y: this.dataBoucleOuverte.uCom.e(this.dataBoucleOuverte.counter * 2 + 2, 1) + this.gravity / this.erg
+        x: this.dataBoucleOuverte.uCom.get([this.dataBoucleOuverte.counter * 2, 0]),
+        y: this.dataBoucleOuverte.uCom.get([this.dataBoucleOuverte.counter * 2 + 1, 0]) + this.gravity / this.erg
       };
       this.applyThrust(thrust);
       this.dataBoucleOuverte.counter += 1;
@@ -201,27 +181,22 @@ class FlyingDudes extends Phaser.Scene {
   }
 
   observState() {
-    try {
-      if (this.mfuel > 0) {
-        this.m = this.mvide + this.mfuel / 1000;
-      } else {
-        this.m = this.mvide;
-      }
-
-      this.erg = this.erg / this.m;
-      this.Bd = math.matrix([
-        [(this.erg * Math.pow(this.Te, 2)) / 2, 0],
-        [this.erg * this.Te, 0],
-        [0, (this.erg * Math.pow(this.Te, 2)) / 2],
-        [0, this.erg * this.Te]
-      ]);
-    } catch (error) {
-      debugError('Error in observState:', error);
+    if (this.mfuel > 0) {
+      this.m = this.mvide + this.mfuel / 1000;
+    } else {
+      this.m = this.mvide;
     }
+
+    this.erg = 45 / this.m;
+    this.Bd = math.matrix([
+      [(this.erg * Math.pow(this.Te, 2)) / 2, 0],
+      [this.erg * this.Te, 0],
+      [0, (this.erg * Math.pow(this.Te, 2)) / 2],
+      [0, this.erg * this.Te]
+    ]);
   }
 
   actionOnReset() {
-    this.initAudioContext();
     this.cConso = 0;
     this.mfuel = 1000;
     this.dudeState = math.matrix([100, 50, -300, 0]);
@@ -241,15 +216,6 @@ class FlyingDudes extends Phaser.Scene {
     }
   }
 
-  initAudioContext() {
-    if (!this.audioContext) {
-      this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      if (this.audioContext.state === 'suspended') {
-        this.audioContext.resume();
-      }
-    }
-  }
-
   BoucleOuverte(posDude, goalPos) {
     this.dataBoucleOuverte.counter = 0;
 
@@ -259,7 +225,7 @@ class FlyingDudes extends Phaser.Scene {
     let G = this.Bd;
     for (let n = 1; n < this.h; n++) {
       const tmpAd = math.pow(this.Ad, n);
-      G = math.concat(math.multiply(tmpAd, this.Bd), G);
+      G = math.concat(G, math.multiply(tmpAd, this.Bd));
     }
 
     if (math.size(G)[0] < math.size(this.Ad)[0]) {
