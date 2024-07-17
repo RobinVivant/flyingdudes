@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build && npm run copy-assets",
+    "build": "react-scripts build && npm run copy-assets && cp public/_redirects build/_redirects && cp public/_headers build/_headers",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "copy-assets": "cp -R src/assets public/"
