@@ -1,99 +1,105 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import Phaser from 'phaser';
 import FlyingDudes from '../game/FlyingDudes';
 
 function Play() {
   const gameRef = useRef(null);
-  const [gameInstance, setGameInstance] = useState(null);
-  const [score, setScore] = useState(0);
-  const [fuel, setFuel] = useState(1000);
-  const [targetsReached, setTargetsReached] = useState(0);
-  const [fuelConsumed, setFuelConsumed] = useState(0);
+  const gameInstanceRef = useRef(null);
+  const [gameState, setGameState] = useState({
+    score: 0,
+    fuel: 1000,
+    targetsReached: 0,
+    fuelConsumed: 0
+  });
+
+  const createGame = useCallback(() => {
+    if (gameRef.current && !gameInstanceRef.current) {
+      const width = Math.min(800, gameRef.current.clientWidth);
+      const height = width * 0.75; // Maintain 4:3 aspect ratio
+
+      const config = {
+        type: Phaser.AUTO,
+        width: width,
+        height: height,
+        parent: gameRef.current,
+        physics: {
+          default: 'arcade',
+          arcade: {
+            gravity: { y: 0 },
+            debug: false
+          }
+        },
+        scene: [FlyingDudes]
+      };
+
+      gameInstanceRef.current = new Phaser.Game(config);
+    }
+  }, []);
+
+  const updateGameState = useCallback(() => {
+    if (gameInstanceRef.current) {
+      const scene = gameInstanceRef.current.scene.getScene('FlyingDudes');
+      if (scene) {
+        setGameState({
+          score: scene.score,
+          fuel: Math.round(scene.mfuel),
+          targetsReached: scene.TargetsReached,
+          fuelConsumed: scene.cConso
+        });
+      }
+    }
+  }, []);
 
   useEffect(() => {
-    const updateGameSize = () => {
-      if (gameRef.current) {
+    createGame();
+    const interval = setInterval(updateGameState, 100);
+
+    const handleResize = () => {
+      if (gameInstanceRef.current) {
         const width = Math.min(800, gameRef.current.clientWidth);
-        const height = width * 0.75; // Maintain 4:3 aspect ratio
-
-        const config = {
-          type: Phaser.AUTO,
-          width: width,
-          height: height,
-          parent: gameRef.current,
-          physics: {
-            default: 'arcade',
-            arcade: {
-              gravity: { y: 0 },
-              debug: false
-            }
-          },
-          scene: [FlyingDudes]
-        };
-
-        if (gameInstance) {
-          gameInstance.destroy(true);
-        }
-
-        const game = new Phaser.Game(config);
-        setGameInstance(game);
-
-        const updateGameState = () => {
-          const scene = game.scene.getScene('FlyingDudes');
-          if (scene) {
-            setScore(scene.score);
-            setFuel(Math.round(scene.mfuel));
-            setTargetsReached(scene.TargetsReached);
-            setFuelConsumed(scene.cConso);
-          }
-        };
-
-        const interval = setInterval(updateGameState, 100);
-
-        return () => {
-          clearInterval(interval);
-          game.destroy(true);
-        };
+        const height = width * 0.75;
+        gameInstanceRef.current.scale.resize(width, height);
       }
     };
 
-    updateGameSize();
-    window.addEventListener('resize', updateGameSize);
+    window.addEventListener('resize', handleResize);
 
     return () => {
-      window.removeEventListener('resize', updateGameSize);
-      if (gameInstance) {
-        gameInstance.destroy(true);
+      clearInterval(interval);
+      window.removeEventListener('resize', handleResize);
+      if (gameInstanceRef.current) {
+        gameInstanceRef.current.destroy(true);
+        gameInstanceRef.current = null;
       }
     };
-  }, [gameInstance]);
+  }, [createGame, updateGameState]);
 
-  const handleReset = () => {
-    if (gameInstance) {
-      const scene = gameInstance.scene.getScene('FlyingDudes');
+  const handleReset = useCallback(() => {
+    if (gameInstanceRef.current) {
+      const scene = gameInstanceRef.current.scene.getScene('FlyingDudes');
       if (scene) {
         scene.actionOnReset();
       }
     }
-  };
+  }, []);
 
-  const handleAutoMode = () => {
-    if (gameInstance) {
-      const scene = gameInstance.scene.getScene('FlyingDudes');
+  const handleAutoMode = useCallback(() => {
+    if (gameInstanceRef.current) {
+      const scene = gameInstanceRef.current.scene.getScene('FlyingDudes');
       if (scene) {
         scene.actionOnAutoMode();
       }
     }
-  };
+  }, []);
 
   return (
     <div className="play-container">
       <h2>The Flying Dude's Adventure</h2>
       <div className="game-info">
-        <p>Score: {score}</p>
-        <p>Fuel: {fuel}</p>
-        <p>Targets: {targetsReached}/6</p>
-        <p>Fuel Used: {fuelConsumed.toFixed(2)}</p>
+        <p>Score: {gameState.score}</p>
+        <p>Fuel: {gameState.fuel}</p>
+        <p>Targets: {gameState.targetsReached}/6</p>
+        <p>Fuel Used: {gameState.fuelConsumed.toFixed(2)}</p>
       </div>
       <div className="game-controls">
         <button onClick={handleReset}>Reset Game</button>
