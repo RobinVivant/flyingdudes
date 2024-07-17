@@ -1,0 +1,29 @@
+import React from 'react';
+import { Routes, Route } from 'react-router-dom';
+import Header from './components/Header';
+import Footer from './components/Footer';
+import Home from './pages/Home';
+import Play from './pages/Play';
+import About from './pages/About';
+import Leroux from './pages/Leroux';
+
+function App() {
+  return (
+    <div className="site-wrapper">
+      <div className="site-wrapper-inner">
+        <div className="cover-container">
+          <Header />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/play" element={<Play />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/leroux" element={<Leroux />} />
+          </Routes>
+          <Footer />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default App;
